@@ -5,7 +5,7 @@
 -- Author     : Benjamin Reese  <bareese@slac.stanford.edu>
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2015-09-25
--- Last update: 2017-04-22
+-- Last update: 2017-08-22
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -36,6 +36,7 @@ entity TimingCore is
       TPGMINI_G         : boolean          := true;
       AXIL_RINGB_G      : boolean          := true;
       ASYNC_G           : boolean          := true;
+      CLKSEL_MODE_G     : string           := "SELECT"; --"LCLSI","LCLSII"
       AXIL_BASE_ADDR_G  : slv(31 downto 0) := (others => '0');
       AXIL_ERROR_RESP_G : slv(1 downto 0)  := AXI_RESP_OK_C;
       USE_TPGMINI_G     : boolean          := true);
@@ -188,6 +189,7 @@ begin
    U_TimingRx : entity work.TimingRx
       generic map (
          TPD_G             => TPD_G,
+         CLKSEL_MODE_G     => CLKSEL_MODE_G,
          AXIL_ERROR_RESP_G => AXI_RESP_DECERR_C)
       port map (
          txClk               => gtTxUsrClk,

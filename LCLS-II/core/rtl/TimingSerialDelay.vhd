@@ -5,7 +5,7 @@
 -- Author     : Matt Weaver  <weaver@slac.stanford.edu>
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2016-07-07
--- Last update: 2016-08-30
+-- Last update: 2017-08-26
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -58,6 +58,7 @@ architecture TimingSerialDelay of TimingSerialDelay is
     target : slv(19 downto 0);
     frame  : Slv16Array(NWORDS_G-1 downto 0);
     state  : StateType;
+    fiducial : slv(1 downto 0);
     firstW : sl;
     rd_cnt : sl;
     rd_msg : sl;
@@ -71,6 +72,7 @@ architecture TimingSerialDelay of TimingSerialDelay is
     target => (others=>'0'),
     frame  => (others=>(others=>'0')),
     state  => ERR_S,
+    fiducial => (others=>'0'),
     firstW => '0',
     rd_cnt => '0',
     rd_msg => '0',
@@ -107,7 +109,7 @@ begin
                    ADDR_WIDTH_G => CADDR_WIDTH_C )
      port map ( rst               => r.fifoRst,
                 clk               => clk,
-                wr_en             => fiducial_i,
+                wr_en             => r.fiducial(0),
                 din(19 downto 0)  => r.target,
                 din(20)           => stream_i.ready,
                 rd_en             => r.rd_cnt,
@@ -138,12 +140,13 @@ begin
      v := r;
 
      v.count  := r.count+1;
-     v.target := r.count+5+delay; -- need extra fixed delay for cntdelay fifo
+     v.target := r.count+205-r.fiducial'length+delay; -- need extra fixed delay for cntdelay fifo
      v.rd_msg := '0';
      v.rd_cnt := '0';
      v.strobe := '0';
      v.fifoRst := '0';
-
+     v.fiducial := fiducial_i & r.fiducial(r.fiducial'left downto 1);
+     
      if fiducial_i='1' then
        v.firstW := '1';
      elsif advance_i='1' then
@@ -162,6 +165,9 @@ begin
            v.frame  := dout_msg & r.frame(r.frame'left downto 1);
            v.rd_msg := '1';
            v.state  := SHIFT_S;
+         elsif fiducial_i='1' then
+           -- Message component not found between fiducials
+           v.rd_cnt := '1';
          end if;
        when SHIFT_S =>
          if (valid_msg='0' or firstW='1') then
