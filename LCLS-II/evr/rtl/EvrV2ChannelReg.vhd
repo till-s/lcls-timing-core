@@ -1,11 +1,11 @@
 -------------------------------------------------------------------------------
 -- Title      : 
 -------------------------------------------------------------------------------
--- File       : EvrV2Core.vhd
+-- File       : EvrV2ChannelReg.vhd
 -- Author     : Matt Weaver <weaver@slac.stanford.edu>
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2016-01-04
--- Last update: 2017-04-27
+-- Last update: 2017-10-27
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -31,7 +31,7 @@ use work.AxiLitePkg.all;
 use work.TimingPkg.all;
 use work.EvrV2Pkg.all;
 
-entity EvrV2Axi is
+entity EvrV2ChannelReg is
   generic (
     TPD_G        : time    := 1 ns;
     DMA_ENABLE_G : boolean := false;
@@ -55,9 +55,9 @@ entity EvrV2Axi is
     rstCount            : out sl;
     eventCount          : in  SlVectorArray(CHANNELS_C downto 0,31 downto 0);
     gtxDebug            : in  slv(7 downto 0) := (others=>'0') );
-end EvrV2Axi;
+end EvrV2ChannelReg;
 
-architecture mapping of EvrV2Axi is
+architecture mapping of EvrV2ChannelReg is
 
   type RegType is record
     axilReadSlave  : AxiLiteReadSlaveType;

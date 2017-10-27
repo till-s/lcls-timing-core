@@ -5,7 +5,7 @@
 -- Author     : Matt Weaver <weaver@slac.stanford.edu>
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2016-01-04
--- Last update: 2017-04-27
+-- Last update: 2017-10-27
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -37,7 +37,7 @@ entity EvrV2Module is
     NCHANNELS_G   : integer          := 1;   -- event selection channels
     NTRIGGERS_G   : integer          := 1;   -- trigger outputs
     TRIG_DEPTH_G  : integer          := 16;  -- maximum pipelined triggers
-    COMMON_CLK_G  : boolean          := false;
+    COMMON_CLK_G  : boolean          := false; -- axiClk and evrClk are common
     AXIL_BASEADDR : slv(31 downto 0) := x"00080000" );
   port (
     -- AXI-Lite and IRQ Interface
@@ -121,17 +121,38 @@ begin  -- rtl
       mAxiReadMasters     => mAxiReadMasters,
       mAxiReadSlaves      => mAxiReadSlaves);   
 
-  U_SyncChannelConfig : entity work.SynchronizerVector
-    generic map ( WIDTH_G => NCHANNELS_G*EVRV2_CHANNEL_CONFIG_BITS_C )
-    port map ( clk     => evrClk,
-               dataIn  => channelConfigAV,
-               dataOut => channelConfigSV );
+  GEN_COMMON : if COMMON_CLK_G generate
+    channelConfigS <= channelConfig;
+    triggerConfigS <= triggerConfig;
+  end generate;
+  
+  GEN_UNCOMMON : if not COMMON_CLK_G generate
+    U_SyncChannelConfig : entity work.SynchronizerVector
+      generic map ( WIDTH_G => NCHANNELS_G*EVRV2_CHANNEL_CONFIG_BITS_C )
+      port map ( clk     => evrClk,
+                 dataIn  => channelConfigAV,
+                 dataOut => channelConfigSV );
+    
+    Loop_EvtSel: for i in 0 to NCHANNELS_G-1 generate
+      channelConfigAV((i+1)*EVRV2_CHANNEL_CONFIG_BITS_C-1 downto i*EVRV2_CHANNEL_CONFIG_BITS_C)
+        <= toSlv(channelConfig(i));
+      channelConfigS(i) <= toChannelConfig(channelConfigSV((i+1)*EVRV2_CHANNEL_CONFIG_BITS_C-1 downto i*EVRV2_CHANNEL_CONFIG_BITS_C));
+    end generate;
+
+    U_SyncTriggerConfig : entity work.SynchronizerVector
+      generic map ( WIDTH_G => NTRIGGERS_G*EVRV2_TRIGGER_CONFIG_BITS_C )
+      port map ( clk     => evrClk,
+                 dataIn  => triggerConfigAV,
+                 dataOut => triggerConfigSV );
+    
+    Out_Trigger: for i in 0 to NTRIGGERS_G-1 generate
+      triggerConfigAV((i+1)*EVRV2_TRIGGER_CONFIG_BITS_C-1 downto i*EVRV2_TRIGGER_CONFIG_BITS_C)
+        <= toSlv(triggerConfig(i));
+      triggerConfigS(i) <= toTriggerConfig(triggerConfigSV((i+1)*EVRV2_TRIGGER_CONFIG_BITS_C-1 downto i*EVRV2_TRIGGER_CONFIG_BITS_C));
+    end generate;
+  end generate;
   
   Loop_EvtSel: for i in 0 to NCHANNELS_G-1 generate
-    channelConfigAV((i+1)*EVRV2_CHANNEL_CONFIG_BITS_C-1 downto i*EVRV2_CHANNEL_CONFIG_BITS_C)
-      <= toSlv(channelConfig(i));
-    channelConfigS(i) <= toChannelConfig(channelConfigSV((i+1)*EVRV2_CHANNEL_CONFIG_BITS_C-1 downto i*EVRV2_CHANNEL_CONFIG_BITS_C));
-
     U_EventSel : entity work.EvrV2EventSelect
       generic map ( TPD_G         => TPD_G )
       port map    ( clk           => evrClk,
@@ -169,17 +190,7 @@ begin  -- rtl
                   rdClk        => axiClk,
                   rdRst        => axiRst );
 
-  U_SyncTriggerConfig : entity work.SynchronizerVector
-    generic map ( WIDTH_G => NTRIGGERS_G*EVRV2_TRIGGER_CONFIG_BITS_C )
-    port map ( clk     => evrClk,
-               dataIn  => triggerConfigAV,
-               dataOut => triggerConfigSV );
-  
   Out_Trigger: for i in 0 to NTRIGGERS_G-1 generate
-     triggerConfigAV((i+1)*EVRV2_TRIGGER_CONFIG_BITS_C-1 downto i*EVRV2_TRIGGER_CONFIG_BITS_C)
-      <= toSlv(triggerConfig(i));
-     triggerConfigS(i) <= toTriggerConfig(triggerConfigSV((i+1)*EVRV2_TRIGGER_CONFIG_BITS_C-1 downto i*EVRV2_TRIGGER_CONFIG_BITS_C));
-
      U_Trig : entity work.EvrV2Trigger
         generic map ( TPD_G        => TPD_G,
                       CHANNELS_C   => NCHANNELS_G,
@@ -193,7 +204,7 @@ begin  -- rtl
                       trigstate  => trigOut(i) );
   end generate Out_Trigger;
   
-  U_EvrAxi : entity work.EvrV2Axi
+  U_EvrAxi : entity work.EvrV2ChannelReg
     generic map ( TPD_G      => TPD_G,
                   CHANNELS_C => NCHANNELS_G )
     port map (    axiClk              => axiClk,

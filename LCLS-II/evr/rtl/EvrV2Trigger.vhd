@@ -9,8 +9,8 @@
 -- Description:
 -- Pipeline of trigger output state.  The trigger output activates config.delay
 -- plus 5 clk ticks after fire is asserted and deasserts after config.width clk
--- ticks.  The FIFO allows up to 127 triggers to be pipelined.  Individual
--- trigger delays and widths have 20 bits range, provided the 127 trigger
+-- ticks.  The FIFO allows up to TRIG_DEPTH_C triggers to be pipelined.  Individual
+-- trigger delays and widths have 20 bits range, provided the TRIG_DEPTH_C trigger
 -- pipelining is not exceeded.
 -------------------------------------------------------------------------------
 -- This file is part of 'LCLS2 Timing Core'.
@@ -38,7 +38,7 @@ use work.EvrV2Pkg.all;
 entity EvrV2Trigger is
   generic ( TPD_G        : time := 1 ns;
             CHANNELS_C   : integer := 1;
-            TRIG_DEPTH_C : integer := 16;
+            TRIG_DEPTH_C : integer := 16;  -- trigger pipeline depth (0 = no pipelining)
             DEBUG_C      : boolean := false);
   port (
       clk        : in  sl;
@@ -61,6 +61,7 @@ architecture EvrV2Trigger of EvrV2Trigger is
      fifoReset      : sl;
      fifoWr         : sl;
      fifoRd         : sl;
+     fifoP          : sl;
      fifoDin        : slv(EVRV2_TRIG_WIDTH-1 downto 0);
    end record;
 
@@ -74,6 +75,7 @@ architecture EvrV2Trigger of EvrV2Trigger is
      fifoReset  => '1',
      fifoWr     => '0',
      fifoRd     => '0',
+     fifoP      => '0',
      fifoDin    => (others=>'0'));
 
    constant FIFO_AWIDTH_C : natural := bitSize( TRIG_DEPTH_C );
@@ -129,22 +131,31 @@ begin
    
    trigstate <= r.state;
 
-   U_Fifo : entity work.FifoSync
-     generic map ( TPD_G        => TPD_G,
-                   DATA_WIDTH_G => EVRV2_TRIG_WIDTH,
-                   ADDR_WIDTH_G => FIFO_AWIDTH_C,
-                   FWFT_EN_G    => false )
-     port map (    rst   => r.fifoReset,
-                   clk   => clk,
-                   wr_en => rin.fifoWr,
-                   rd_en => rin.fifoRd,
-                   din   => rin.fifoDin,
-                   dout  => fifoDout,
-                   valid => fifoValid,
-                   empty => fifoEmpty,
-                   full  => fifoFull,
-                   data_count => fifoCount );
-
+   NOGEN_FIFO : if TRIG_DEPTH_C = 0 generate
+     fifoDout  <= r.fifoDin;
+     fifoEmpty <= not r.fifoP;
+     fifoValid <= r.fifoP;
+     fifoCount(0) <= r.fifoP;
+   end generate;
+   
+   GEN_FIFO : if TRIG_DEPTH_C > 0 generate
+     U_Fifo : entity work.FifoSync
+       generic map ( TPD_G        => TPD_G,
+                     DATA_WIDTH_G => EVRV2_TRIG_WIDTH,
+                     ADDR_WIDTH_G => FIFO_AWIDTH_C,
+                     FWFT_EN_G    => false )
+       port map (    rst   => r.fifoReset,
+                     clk   => clk,
+                     wr_en => rin.fifoWr,
+                     rd_en => rin.fifoRd,
+                     din   => rin.fifoDin,
+                     dout  => fifoDout,
+                     valid => fifoValid,
+                     empty => fifoEmpty,
+                     full  => fifoFull,
+                     data_count => fifoCount );
+   end generate;
+   
    process (r, arm, fire, rst, config, fifoValid, fifoDout, fifoEmpty)
       variable v : RegType;
    begin 
@@ -186,6 +197,12 @@ begin
          v.armed := '1';
       end if;
 
+      if v.fifoWr = '1' then
+        v.fifoP := '1';
+      elsif v.fifoRd = '1' then
+        v.fifoP := '0';
+      end if;
+      
       if rst='1' or config.enabled='0' then
          v := REG_INIT_C;
       end if;
