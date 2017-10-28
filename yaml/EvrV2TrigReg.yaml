@@ -9,8 +9,7 @@
 ##############################################################################
 #schemaversion 3.0.0
 #once EvrV2TrigReg
-#include EvrV2Trig
-#include EvrV2TrigTap
+#include EvrV2Trig.yaml
 
 EvrV2TrigReg: &EvrV2TrigReg
   class: MMIODev
@@ -22,13 +21,7 @@ EvrV2TrigReg: &EvrV2TrigReg
   children:
     #########################################################  
     Trigs:
-      <<: EvrV2Trig
+      <<: *EvrV2Trig
       at:
         offset: 0x00
-        nelms: EvrV2Trigs
-    #########################################################  
-    TrigTaps:
-      <<: EvrV2TrigTap
-      at:
-        offset: 0x00
-        nelms: EvrV2Trigs
+        nelms: *EvrV2Trigs

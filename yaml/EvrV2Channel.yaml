@@ -16,7 +16,6 @@ EvrV2Channel: &EvrV2Channel
   description: Channel
   size: 0x20
   metadata:
-    numBuffers: &numBuffers 4
     rateEnums: &rateEnums
         - name: Fixed
           value: 0
@@ -124,7 +123,7 @@ EvrV2Channel: &EvrV2Channel
       mode: RW
       lsBit: 5
       sizeBits: 2
-      enums: *destEnum
+      enums: *destEnums
       description: Destination select mode
     #########################################################  
     DestMask:

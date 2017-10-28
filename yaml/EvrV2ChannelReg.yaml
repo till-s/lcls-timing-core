@@ -9,9 +9,9 @@
 ##############################################################################
 #schemaversion 3.0.0
 #once EvrV2ChannelReg
-#include EvrV2Control
-#include EvrV2Channel
-#include EvrV2ChannelDMA
+#include EvrV2Control.yaml
+#include EvrV2Channel.yaml
+#include EvrV2ChannelDMA.yaml
 
 EvrV2ChannelReg: &EvrV2ChannelReg
   class: MMIODev
@@ -23,18 +23,18 @@ EvrV2ChannelReg: &EvrV2ChannelReg
   children:
     #########################################################  
     DmaControl:
-      <<: EvrV2Control
+      <<: *EvrV2Control
       at:
         offset: 0x000
     #########################################################  
     Channels:
-      <<: EvrV2Channel
+      <<: *EvrV2Channel
       at:
         offset: 0x020
-        nelms: EvrV2Channels
+        nelms: *EvrV2Channels
     #########################################################  
     ChannelsDMA:
-      <<: EvrV2ChannelDMA
+      <<: *EvrV2ChannelDMA
       at:
         offset: 0x020
-        nelms: EvrV2Channels
+        nelms: *EvrV2Channels

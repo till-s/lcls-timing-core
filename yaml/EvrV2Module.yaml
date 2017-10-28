@@ -9,8 +9,8 @@
 ##############################################################################
 #schemaversion 3.0.0
 #once EvrV2Module
-#include EvrV2ChannelReg
-#include EvrV2TrigReg
+#include EvrV2ChannelReg.yaml
+#include EvrV2TrigReg.yaml
 
 EvrV2Module: &EvrV2Module
   class: MMIODev
@@ -23,13 +23,13 @@ EvrV2Module: &EvrV2Module
   children:
     #########################################################  
     Channels:
-      <<: EvrV2ChannelReg
+      <<: *EvrV2ChannelReg
       at:
         offset: 0x000
-        numChannels: EvrV2Channels
+        numChannels: *EvrV2Channels
     #########################################################  
     Triggers:
-      <<: EvrV2TrigReg
+      <<: *EvrV2TrigReg
       at:
         offset: 0x200
-        nelms: EvrV2Triggers
+        nelms: *EvrV2Triggers
