@@ -1,0 +1,86 @@
+#############################
+## This file is part of 'SLAC Firmware Standard Library'.
+## It is subject to the license terms in the LICENSE.txt file found in the 
+## top-level directory of this distribution and at: 
+##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
+## No part of 'SLAC Firmware Standard Library', including this file, 
+## may be copied, modified, propagated, or distributed except according to 
+## the terms contained in the LICENSE.txt file.
+##############################################################################
+#schemaversion 3.0.0
+#once EvrV2Trig
+
+EvrV2Trig: &EvrV2Trig
+  class: MMIODev
+  configPrio: 1
+  description: Trig
+  size: 0x10
+  metadata:
+    polEnums: &polEnums
+        - name: Negative
+          value: 0
+        - name: Polarity
+          value: 1
+  children:
+    #########################################################  
+    Source:
+      at:
+        offset: 0x00
+      class: IntField
+      name: Source
+      mode: RW
+      lsBit: 0
+      sizeBits: 4
+      description: Source channel
+    #########################################################  
+    Polarity:
+      at:
+        offset: 0x02
+      class: IntField
+      name: Polarity
+      mode: RW
+      lsBit: 0
+      sizeBits: 1
+      enums: *polEnums
+      description: Signal polarity
+    #########################################################  
+    Enabled:
+      at:
+        offset: 0x03
+      class: IntField
+      name: Enabled
+      mode: RW
+      lsBit: 7
+      sizeBits: 1
+      description: Enabled
+    #########################################################  
+    Delay:
+      at:
+        offset: 0x04
+      class: IntField
+      name: Delay
+      mode: RW
+      lsBit: 0
+      sizeBits: 28
+      description: Delay (ticks)
+    #########################################################  
+    Width:
+      at:
+        offset: 0x08
+      class: IntField
+      name: Width
+      mode: RW
+      lsBit: 0
+      sizeBits: 28
+      description: Width (ticks)
+    #########################################################  
+    TapDelay:
+      at:
+        offset: 0x0C
+      class: IntField
+      name: TapDelay
+      mode: RW
+      lsBit: 0
+      sizeBits: 6
+      description: Tap delay (approx 1/64th ticks)
+    #########################################################  

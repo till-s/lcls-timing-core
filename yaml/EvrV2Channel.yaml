@@ -1,0 +1,146 @@
+#############################
+## This file is part of 'SLAC Firmware Standard Library'.
+## It is subject to the license terms in the LICENSE.txt file found in the 
+## top-level directory of this distribution and at: 
+##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
+## No part of 'SLAC Firmware Standard Library', including this file, 
+## may be copied, modified, propagated, or distributed except according to 
+## the terms contained in the LICENSE.txt file.
+##############################################################################
+#schemaversion 3.0.0
+#once EvrV2Channel
+
+EvrV2Channel: &EvrV2Channel
+  class: MMIODev
+  configPrio: 1
+  description: Channel
+  size: 0x20
+  metadata:
+    numBuffers: &numBuffers 4
+    rateEnums: &rateEnums
+        - name: Fixed
+          value: 0
+        - name: PowerSync
+          value: 1
+        - name: Sequence
+          value: 2
+        - name: Partition
+          value: 3
+    destEnums: &destEnums
+        - name: Inclusive
+          value: 0
+        - name: Exclusive
+          value: 1
+        - name: DontCare
+          value: 2
+  children:
+    #########################################################  
+    Enabled:
+      at:
+        offset: 0x00
+      class: IntField
+      name: Enabled
+      mode: RW
+      lsBit: 0
+      sizeBits: 1
+      description: Irq Enable Register
+    #########################################################  
+    RateMode:
+      at:
+        offset: 0x05
+      class: IntField
+      name: RateMode
+      mode: RW
+      lsBit: 3
+      sizeBits: 2
+      enums: *rateEnums
+      description: Rate mode
+    #########################################################  
+    FixedMarker:
+      at:
+        offset: 0x04
+      class: IntField
+      name: FixedMarker
+      mode: RW
+      lsBit: 0
+      sizeBits: 4
+      description: Fixed rate marker
+    #########################################################  
+    ACMarker:
+      at:
+        offset: 0x04
+      class: IntField
+      name: ACMarker
+      mode: RW
+      lsBit: 0
+      sizeBits: 3
+      description: AC rate marker
+    #########################################################  
+    ACTimeslotM:
+      at:
+        offset: 0x04
+      class: IntField
+      name: ACTimeslotM
+      mode: RW
+      lsBit: 3
+      sizeBits: 6
+      description: AC rate timeslot mask
+    #########################################################  
+    Seq:
+      at:
+        offset: 0x04
+      class: IntField
+      name: Seq
+      mode: RW
+      lsBit: 4
+      sizeBits: 5
+      description: Sequence number
+    #########################################################  
+    SeqBit:
+      at:
+        offset: 0x04
+      class: IntField
+      name: SeqBit
+      mode: RW
+      lsBit: 0
+      sizeBits: 4
+      description: Sequence bit
+    #########################################################  
+    Partition:
+      at:
+        offset: 0x04
+      class: IntField
+      name: Partition
+      mode: RW
+      lsBit: 0
+      sizeBits: 4
+      description: Partition 
+    #########################################################  
+    DestMode:
+      at:
+        offset: 0x07
+      class: IntField
+      name: DestMode
+      mode: RW
+      lsBit: 5
+      sizeBits: 2
+      enums: *destEnum
+      description: Destination select mode
+    #########################################################  
+    DestMask:
+      at:
+        offset: 0x05
+      class: IntField
+      name: DestMode
+      mode: RW
+      lsBit: 5
+      sizeBits: 16
+      description: Destination mask
+    #########################################################  
+    Count:
+      at:
+        offset: 0x08
+      class: IntField
+      name: Count
+      mode: RO
+      description: Counts

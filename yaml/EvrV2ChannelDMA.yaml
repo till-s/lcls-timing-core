@@ -1,0 +1,68 @@
+#############################
+## This file is part of 'SLAC Firmware Standard Library'.
+## It is subject to the license terms in the LICENSE.txt file found in the 
+## top-level directory of this distribution and at: 
+##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
+## No part of 'SLAC Firmware Standard Library', including this file, 
+## may be copied, modified, propagated, or distributed except according to 
+## the terms contained in the LICENSE.txt file.
+##############################################################################
+#schemaversion 3.0.0
+#once EvrV2ChannelDMA
+
+EvrV2ChannelDMA: &EvrV2ChannelDMA
+  class: MMIODev
+  configPrio: 1
+  description: Channel
+  size: 0x20
+  children:
+    ##########################
+    BsaEnabled:
+      at:
+        offset: 0x00
+      class: IntField
+      name: BsaEnabled
+      mode: RW
+      lsBit: 1
+      sizeBits: 1
+      description: BSA Enable Register
+    #########################################################  
+    DmaEnabled:
+      at:
+        offset: 0x00
+      class: IntField
+      name: DmaEnabled
+      mode: RW
+      lsBit: 2
+      sizeBits: 1
+      description: DMA Enable Register
+    #########################################################  
+    BsaActiveDelay:
+      at:
+        offset: 0x0C
+      class: IntField
+      name: BsaActiveDelay
+      mode: RW
+      lsBit: 0
+      sizeBits: 20
+      description: BSA sensitivity window start (delay)
+    #########################################################  
+    BsaActiveSetup:
+      at:
+        offset: 0x0E
+      class: IntField
+      name: BsaActiveSetup
+      mode: RW
+      lsBit: 4
+      sizeBits: 6
+      description: BSA sensitivity window start (presample)
+    #########################################################  
+    BsaActiveWidth:
+      at:
+        offset: 0x10
+      class: IntField
+      name: BsaActiveWidth
+      mode: RW
+      lsBit: 0
+      sizeBits: 20
+      description: BSA sensitivity window length

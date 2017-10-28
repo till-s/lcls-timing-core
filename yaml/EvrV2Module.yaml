@@ -1,0 +1,35 @@
+##############################################################################
+## This file is part of 'SLAC Firmware Standard Library'.
+## It is subject to the license terms in the LICENSE.txt file found in the 
+## top-level directory of this distribution and at: 
+##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
+## No part of 'SLAC Firmware Standard Library', including this file, 
+## may be copied, modified, propagated, or distributed except according to 
+## the terms contained in the LICENSE.txt file.
+##############################################################################
+#schemaversion 3.0.0
+#once EvrV2Module
+#include EvrV2ChannelReg
+#include EvrV2TrigReg
+
+EvrV2Module: &EvrV2Module
+  class: MMIODev
+  configPrio: 1
+  description: EvrV2 Registers
+  size: 0x400
+  metadata: 
+    numChannels: &EvrV2Channels 1
+    numTriggers: &EvrV2Triggers 1
+  children:
+    #########################################################  
+    Channels:
+      <<: EvrV2ChannelReg
+      at:
+        offset: 0x000
+        numChannels: EvrV2Channels
+    #########################################################  
+    Triggers:
+      <<: EvrV2TrigReg
+      at:
+        offset: 0x200
+        nelms: EvrV2Triggers
