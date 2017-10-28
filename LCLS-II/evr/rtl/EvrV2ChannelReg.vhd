@@ -139,7 +139,7 @@ begin  -- mapping
       axilSlaveRegisterW(slv(conv_unsigned(i*32+36,9)), 13, v.channelConfig(i).destSel);
       axilSlaveRegisterR(slv(conv_unsigned(i*32+40,9)), muxSlVectorArray(eventCount, i));
     end loop;  -- i
-    axilSlaveRegisterR(slv(conv_unsigned(12*32+40,9)), muxSlVectorArray(eventCount, CHANNELS_C));
+    axilSlaveRegisterR(slv(conv_unsigned(CHANNELS_C*32+40,9)), muxSlVectorArray(eventCount, CHANNELS_C));
 
     if DMA_ENABLE_G then
       axilSlaveRegisterW(X"000", 0, v.irqEnable);

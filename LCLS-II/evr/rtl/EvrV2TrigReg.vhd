@@ -5,7 +5,7 @@
 -- Author     : Matt Weaver <weaver@slac.stanford.edu>
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2016-01-04
--- Last update: 2017-04-27
+-- Last update: 2017-10-27
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -109,7 +109,7 @@ begin  -- mapping
         v.triggerConfig(i).loadTap := r.loadShift(i)(3);
         v.loadShift(i) := r.loadShift(i)(2 downto 0) & '0';
         if (axilStatus.readEnable = '1') then
-          if (std_match(axilReadMaster.araddr(11 downto 0), toSlv(524+i*16,12))) then
+          if (std_match(axilReadMaster.araddr(8 downto 0), toSlv(12+i*16,12))) then
             v.axilReadSlave.rdata(31 downto 6) := (others=>'0');
             v.axilReadSlave.rdata( 5 downto 0) := delay_rd(i);
             axiSlaveReadResponse(v.axilReadSlave);
@@ -117,7 +117,7 @@ begin  -- mapping
         end if;
 
         if (axilStatus.writeEnable = '1') then
-          if (std_match(axilWriteMaster.awaddr(11 downto 0), toSlv(524+i*16,12))) then
+          if (std_match(axilWriteMaster.awaddr(8 downto 0), toSlv(12+i*16,12))) then
             v.triggerConfig(i).delayTap := axilWriteMaster.wdata(5 downto 0);
             axiSlaveWriteResponse(v.axilWriteSlave);
             v.loadShift(i)(0) := '1';
