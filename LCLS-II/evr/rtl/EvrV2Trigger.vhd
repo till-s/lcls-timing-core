@@ -39,12 +39,13 @@ entity EvrV2Trigger is
   generic ( TPD_G        : time := 1 ns;
             CHANNELS_C   : integer := 1;
             TRIG_DEPTH_C : integer := 16;
+            USE_MASK_G   : boolean := false;
             DEBUG_C      : boolean := false);
   port (
       clk        : in  sl;
       rst        : in  sl;
       config     : in  EvrV2TriggerConfigType;
-      arm        : in  slv(CHANNELS_C-1 downto 0);
+      arm        : in  slv(15 downto 0);
       fire       : in  sl;
       trigstate  : out sl );
 end EvrV2Trigger;
@@ -118,13 +119,13 @@ begin
                   probe0(156 downto 129) => r.fifo_delay,
                   probe0(176 downto 157) => config.delay,
                   probe0(196 downto 177) => config.width,
-                  probe0(200 downto 197) => config.channel,
+                  probe0(200 downto 197) => config.channel(3 downto 0),
                   probe0(201)            => config.enabled,
                   probe0(208 downto 202) => resize(fifoCount,7),
                   probe0(209)            => fifoEmpty,
                   probe0(210)            => fifoFull,
-                  probe0(210+CHANNELS_C downto 211) => arm,
-                  probe0(255 downto 211+CHANNELS_C) => (others=>'0') );
+                  probe0(225 downto 211) => arm,
+                  probe0(255 downto 216) => (others=>'0') );
    end generate G_ila;
    
    trigstate <= r.state;
@@ -182,7 +183,8 @@ begin
          end if;
       end if;
 
-      if arm(conv_integer(config.channel)) = '1' then
+      if ((arm(conv_integer(config.channel)) = '1' and not USE_MASK_G) or
+          (arm and config.channels) /= toSlv(0,15) and USE_MASK_G)) then
          v.armed := '1';
       end if;
 

@@ -5,7 +5,7 @@
 -- Author     : Matt Weaver <weaver@slac.stanford.edu>
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2016-01-04
--- Last update: 2017-05-11
+-- Last update: 2017-11-20
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -80,6 +80,7 @@ package EvrV2Pkg is
     delay    : slv(EVRV2_TRIG_WIDTH-1 downto 0);
     width    : slv(EVRV2_TRIG_WIDTH-1 downto 0);
     channel  : slv( 3 downto 0);
+    channels : slv(15 downto 0);  -- mask of channels that arm trigger
     delayTap : slv( 5 downto 0);
     loadTap  : sl;
   end record;
@@ -90,6 +91,7 @@ package EvrV2Pkg is
     delay     => (others=>'0'),
     width     => (others=>'0'),
     channel   => (others=>'0'),
+    channels  => (others=>'0'),
     delayTap  => (others=>'0'),
     loadTap   => '0' );
 

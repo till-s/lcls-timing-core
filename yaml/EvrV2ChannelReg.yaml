@@ -1,0 +1,212 @@
+#############################
+## This file is part of 'SLAC Firmware Standard Library'.
+## It is subject to the license terms in the LICENSE.txt file found in the 
+## top-level directory of this distribution and at: 
+##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
+## No part of 'SLAC Firmware Standard Library', including this file, 
+## may be copied, modified, propagated, or distributed except according to 
+## the terms contained in the LICENSE.txt file.
+##############################################################################
+#schemaversion 3.0.0
+#once EvrV2ChannelReg
+
+EvrV2ChannelReg: &EvrV2ChannelReg
+  class: MMIODev
+  configPrio: 1
+  description: Channel
+  size: 0x20
+  children:
+    #########################################################  
+    Enabled:
+      at:
+        offset: 0x00
+      class: IntField
+      name: Enabled
+      sizeBits: 1
+      lsbit: 0
+      mode: RW
+      description: Irq Enable Register
+    #########################################################  
+    BsaEnabled:
+      at:
+        offset: 0x00
+      class: IntField
+      name: BsaEnabled
+      sizeBits: 1
+      lsbit: 1
+      mode: RW
+      description: Bsa Enable Register
+    #########################################################  
+    DmaEnabled:
+      at:
+        offset: 0x00
+      class: IntField
+      name: DmaEnabled
+      sizeBits: 1
+      lsbit: 2
+      mode: RW
+      description: Dma Enable Register
+    #########################################################  
+    RateSel:
+      at:
+        offset: 0x04
+      class: IntField
+      name: RateSelect
+      sizeBits: 13
+      lsbit: 0
+      mode: RW
+      description: Rate select
+    #########################################################  
+    RateSelMode:
+      at:
+        offset: 0x04
+      class: IntField
+      name: RateSelect
+      sizeBits: 2
+      lsbit: 11
+      mode: RW
+      enums:
+        { name: FixedRate, value: 0 }
+        { name: ACRate   , value: 1 }
+        { name: Sequence , value: 2 }
+        { name: Partition, value: 3 }
+      description: Rate select mode
+    #########################################################  
+    FixedRate:
+      at:
+        offset: 0x04
+      class: IntField
+      name: FixedRate
+      sizeBits: 4
+      lsbit: 0
+      mode: RW
+      description: Fixed rate select
+    #########################################################  
+    ACRate:
+      at:
+        offset: 0x04
+      class: IntField
+      name: ACRate
+      sizeBits: 3
+      lsbit: 0
+      mode: RW
+      enums:
+        { name: 60Hz , value: 0 }
+        { name: 30Hz , value: 1 }
+        { name: 10Hz , value: 2 }
+        { name: 5Hz  , value: 3 }
+        { name: 1Hz  , value: 4 }
+        { name: 0_5Hz, value: 5 }
+      description: AC rate select
+    #########################################################  
+    ACTimeSlot:
+      at:
+        offset: 0x04
+      class: IntField
+      name: ACTimeSlot
+      sizeBits: 6
+      lsbit: 3
+      mode: RW
+      description: AC timeslot select mask (TS1 at bit 0)
+    #########################################################  
+    SequenceSelect:
+      at:
+        offset: 0x04
+      class: IntField
+      name: SequenceSelect
+      sizeBits: 5
+      lsbit: 4
+      mode: RW
+      description: Sequence select
+    #########################################################  
+    SequenceBitSelect:
+      at:
+        offset: 0x04
+      class: IntField
+      name: SequenceBitSelect
+      sizeBits: 4
+      lsbit: 0
+      mode: RW
+      description: Sequence bit select
+    #########################################################  
+    PartitionSelect:
+      at:
+        offset: 0x04
+      class: IntField
+      name: PartitionSelect
+      sizeBits: 3
+      lsbit: 0
+      mode: RW
+      description: Partition select
+    #########################################################  
+    DestSel:
+      at:
+        offset: 0x04
+      class: IntField
+      name: DestSelect
+      sizeBits: 19
+      lsbit: 13
+      mode: RW
+      description: Destination select
+    #########################################################  
+    DestSelMode:
+      at:
+        offset: 0x04
+      class: IntField
+      name: DestSelectMode
+      sizeBits: 2
+      lsbit: 29
+      mode: RW
+      enums:
+        { name: Include , value: 0 }
+        { name: Exclude , value: 1 }
+        { name: DontCare, value: 2 }
+      description: Destination select mode
+    #########################################################  
+    DestMask:
+      at:
+        offset: 0x04
+      class: IntField
+      name: DestMask
+      sizeBits: 16
+      lsbit: 13
+      mode: RW
+      description: Mask of beam destinations
+    #########################################################  
+    Count:
+      at:
+        offset: 0x08
+      class: IntField
+      name: Count
+      mode: RO
+      description: Counts
+    #########################################################  
+    BsaWindowDelay:
+      at:
+        offset: 0x0C
+      class: IntField
+      name: BsaWindowDelay
+      sizeBits: 20
+      lsbit: 0
+      mode: RW
+      description: Start of BSA sensitivity window following trigger
+    #########################################################  
+    BsaWindowSetup:
+      at:
+        offset: 0x0C
+      class: IntField
+      name: BsaWindowSetup
+      sizeBits: 6
+      lsbit: 20
+      mode: RW
+      description: Start of BSA sensitivity window before trigger
+    #########################################################  
+    BsaWindowWidth:
+      at:
+        offset: 0x10
+      class: IntField
+      name: BsaWindowWidth
+      sizeBits: 20
+      lsbit: 0
+      mode: RW
+      description: Width of BSA sensitivity window
