@@ -57,8 +57,8 @@ architecture EvrV2Trigger of EvrV2Trigger is
    type RegType is record
      fifo_delay     : slv(TRIG_WIDTH_C-1 downto 0);      -- clks until trigger fifo is empty
      armed          : sl;
-     delay          : slv(EVRV2_TRIG_WIDTH-1 downto 0);
-     width          : slv(EVRV2_TRIG_WIDTH-1 downto 0);
+     delay          : slv(TRIG_WIDTH_C-1 downto 0);
+     width          : slv(TRIG_WIDTH_C-1 downto 0);
      state          : sl;
      fifoReset      : sl;
      fifoWr         : sl;
