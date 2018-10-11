@@ -28,7 +28,8 @@ entity GthRxAlignCheck is
    generic (
       TPD_G      : time   := 1 ns;
       GT_TYPE_G  : string := "GTHE3";   -- or GTYE3, GTHE4, GTYE4 
-      DRP_ADDR_G : slv(31 downto 0));
+      REF_CLK_FREQ_G : real := 156.25E6;
+      DRP_ADDR_G     : slv(31 downto 0));
    port (
       -- Clock Monitoring
       txClk            : in  sl;
@@ -122,9 +123,9 @@ begin
    U_txClkFreq : entity work.SyncClockFreq
       generic map (
          TPD_G          => TPD_G,
-         REF_CLK_FREQ_G => 156.25E+6,   -- Units of Hz
-         REFRESH_RATE_G => 1.0,         -- Units of Hz
-         CNT_WIDTH_G    => 32)          -- Counters' width
+         REF_CLK_FREQ_G => REF_CLK_FREQ_G,  -- Units of Hz
+         REFRESH_RATE_G => 1.0,             -- Units of Hz
+         CNT_WIDTH_G    => 32)              -- Counters' width
       port map (
          -- Frequency Measurement and Monitoring Outputs (locClk domain)
          freqOut => txClkFreq,
@@ -136,9 +137,9 @@ begin
    U_rxClkFreq : entity work.SyncClockFreq
       generic map (
          TPD_G          => TPD_G,
-         REF_CLK_FREQ_G => 156.25E+6,   -- Units of Hz
-         REFRESH_RATE_G => 1.0,         -- Units of Hz
-         CNT_WIDTH_G    => 32)          -- Counters' width
+         REF_CLK_FREQ_G => REF_CLK_FREQ_G,  -- Units of Hz
+         REFRESH_RATE_G => 1.0,             -- Units of Hz
+         CNT_WIDTH_G    => 32)              -- Counters' width
       port map (
          -- Frequency Measurement and Monitoring Outputs (locClk domain)
          freqOut => rxClkFreq,
