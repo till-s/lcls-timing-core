@@ -26,8 +26,8 @@ use work.AxiLiteMasterPkg.all;
 
 entity GthRxAlignCheck is
    generic (
-      TPD_G      : time   := 1 ns;
-      GT_TYPE_G  : string := "GTHE3";   -- or GTYE3, GTHE4, GTYE4 
+      TPD_G          : time   := 1 ns;
+      GT_TYPE_G      : string := "GTHE3";   -- or GTYE3, GTHE4, GTYE4, GTH2, GTX2, GTP
       REF_CLK_FREQ_G : real := 156.25E6;
       DRP_ADDR_G     : slv(31 downto 0));
    port (
@@ -57,13 +57,37 @@ end entity GthRxAlignCheck;
 
 architecture rtl of GthRxAlignCheck is
 
+   function commaAlignLatencyOffset(gtType: string) return slv is
+   begin
+      -- VHDL doesn't like case statements on strings
+      if    (    gtType = "GTHE3"
+              or gtType = "GTH2"
+              or gtType = "GTP"
+            ) then
+            return x"0000_0540";
+      elsif (    gtType = "GTYE3"
+              or gtType = "GTHE4"
+              or gtType = "GTYE4"
+            ) then
+            return x"0000_0940";
+      elsif (    gtType = "GTX2"
+            ) then
+            return x"0000_0538";
+      end if;
+      assert false report "Invalid GT_TYPE_G" severity failure;
+   end function commaAlignLatencyOffset;
+
    ----------------------------------------------------------------------
    -- GTHE3 = x"0000_0540" (DRP_ADDR=0x150, see UG576 (v1.5) on page 508)
    -- GTYE3 = x"0000_0940" (DRP_ADDR=0x250, see UG578 (v1.3) on page 396)
    -- GTHE4 = x"0000_0940" (DRP_ADDR=0x250, see UG576 (v1.5) on page 421)
    -- GTYE4 = x"0000_0940" (DRP_ADDR=0x250, see UG578 (v1.3) on page 443)
+   -- GTH2  = x"0000_0540" (DRP_ADDR=0x150, see UG576 (7series,    v1.12.1) on page 237)
+   -- GTX2  = x"0000_0538" (DRP_ADDR=0x14E, see UG576 (7series,    v1.12.1) on page 237)
+   -- GTP   = x"0000_0540" (DRP_ADDR=0x150, see UG482 (7series,    v1.9)    on page 169)
    ----------------------------------------------------------------------
-   constant COMMA_ALIGN_LATENCY_OFFSET_C : slv(31 downto 0) := ite((GT_TYPE_G = "GTHE3"), x"0000_0540", x"0000_0940");
+
+   constant COMMA_ALIGN_LATENCY_OFFSET_C : slv(31 downto 0) := commaAlignLatencyOffset(GT_TYPE_G);
    constant COMMA_ALIGN_LATENCY_ADDR_C   : slv(31 downto 0) := (DRP_ADDR_G + COMMA_ALIGN_LATENCY_OFFSET_C);
 
    constant LOCK_VALUE : integer := 16;
