@@ -7,6 +7,7 @@ if { $::env(VIVADO_VERSION) >= 2016.4 } {
 
    loadSource   -path "$::DIR_PATH/coregen/TimingGtx.dcp"
    # loadIpCore -path "$::DIR_PATH/coregen/TimingGtx.xci"
+   loadIpCore -path "$::DIR_PATH/coregen/TimingGtp.xci"
 
 } else {
    puts "\n\nWARNING: $::DIR_PATH requires Vivado 2016.4 (or later)\n\n"
