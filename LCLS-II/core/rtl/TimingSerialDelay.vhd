@@ -126,6 +126,7 @@ begin
      generic map ( TPD_G        => TPD_G,
                    FWFT_EN_G    => true,
                    DATA_WIDTH_G => 17,
+                   USE_DSP48_G  => "yes",
                    ADDR_WIDTH_G => MADDR_WIDTH_C )
      port map ( rst               => r.fifoRst,
                 clk               => clk,
