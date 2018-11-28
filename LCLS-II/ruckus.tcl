@@ -17,6 +17,9 @@ if { ${family} == "kintexuplus" } {
    loadRuckusTcl "$::DIR_PATH/gtyUltraScale+"
 }
 
-if { ${family} == "zynq" } {
+if {   ${family} == "zynq"
+    || ${family} == "artix7"
+    || ${family} == "kintex7"
+    || ${family} == "virtex7" } {
    loadRuckusTcl "$::DIR_PATH/7Series"
 }
