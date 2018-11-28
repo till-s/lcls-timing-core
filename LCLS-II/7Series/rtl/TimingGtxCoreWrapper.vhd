@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------------
--- File       : TimingGtCoreWrapper.vhd
+-- File       : TimingGtxCoreWrapper.vhd
 -- Company    : SLAC National Accelerator Laboratory
 -------------------------------------------------------------------------------
 -- Description: Wrapper for GTX Core
@@ -41,9 +41,9 @@ entity TimingGtxCoreWrapper is
       axilWriteSlave  : out AxiLiteWriteSlaveType;
 
       stableClk : in  sl;
-      -- GTH FPGA IO
+      -- GTX FPGA IO
       gtRefClk  : in  sl;
-      gtRefClkDiv2  : in  sl := '0';-- Unused in GTHE3, but used in GTHE4
+      gtRefClkDiv2  : in  sl := '0';-- Unused in GTX, but used in GTHE4
       gtRxP     : in  sl;
       gtRxN     : in  sl;
       gtTxP     : out sl;
@@ -60,6 +60,7 @@ entity TimingGtxCoreWrapper is
       rxDispErr      : out slv(1 downto 0);
       rxDecErr       : out slv(1 downto 0);
       rxOutClk       : out sl;
+      rxPolInvert    : in  sl := '0';
 
       -- Tx Ports
       txControl      : in  TimingPhyControlType;
@@ -69,6 +70,7 @@ entity TimingGtxCoreWrapper is
       txData         : in  slv(15 downto 0);
       txDataK        : in  slv(1 downto 0);
       txOutClk       : out sl;
+      txPolInvert    : in  sl := '0';
 
       -- Loopback
       loopback       : in slv(2 downto 0));
@@ -144,6 +146,8 @@ port (
     ------------- Receive Ports - RX Initialization and Reset Ports ------------
     gt0_gtrxreset_in                        : in   std_logic;
     gt0_rxpmareset_in                       : in   std_logic;
+    ----------------- Receive Ports - RX Polarity Control Ports ----------------
+    gt0_rxpolarity_in                       : in   std_logic;
     ------------------- Receive Ports - RX8B/10B Decoder Ports -----------------
     gt0_rxcharisk_out                       : out  std_logic_vector(1 downto 0);
     -------------- Receive Ports -RX Initialization and Reset Ports ------------
@@ -169,7 +173,8 @@ port (
     gt0_txcharisk_in                        : in   std_logic_vector(1 downto 0);
     ------------- Transmit Ports - TX Initialization and Reset Ports -----------
     gt0_txresetdone_out                     : out  std_logic;
-
+    ----------------- Transmit Ports - TX Polarity Control Ports ---------------
+    gt0_txpolarity_in                       : in   std_logic;
 
     --____________________________COMMON PORTS________________________________
      GT0_QPLLOUTCLK_IN  : in std_logic;
@@ -373,6 +378,8 @@ begin
          ------------- Receive Ports - RX Initialization and Reset Ports ------------
          gt0_gtrxreset_in                =>      '0',
          gt0_rxpmareset_in               =>      '0',
+         ----------------- Receive Ports - RX Polarity Control Ports ----------------
+         gt0_rxpolarity_in               =>      rxPolInvert,
          ------------------- Receive Ports - RX8B/10B Decoder Ports -----------------
          gt0_rxcharisk_out               =>      rxDataK,
          -------------- Receive Ports -RX Initialization and Reset Ports ------------
@@ -398,7 +405,8 @@ begin
          gt0_txcharisk_in                =>      txDataK,
          ------------- Transmit Ports - TX Initialization and Reset Ports -----------
          gt0_txresetdone_out             =>      open,
- 
+         ----------------- Transmit Ports - TX Polarity Control Ports ---------------
+         gt0_txpolarity_in               =>      txPolInvert,
          gt0_qplloutclk_in               =>      '0',
          gt0_qplloutrefclk_in            =>      '0'
       );
