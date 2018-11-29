@@ -5,8 +5,8 @@ if { $::env(VIVADO_VERSION) >= 2016.4 } {
 
    loadSource -dir "$::DIR_PATH/rtl"
 
-   loadSource   -path "$::DIR_PATH/coregen/TimingGtx.dcp"
-   # loadIpCore -path "$::DIR_PATH/coregen/TimingGtx.xci"
+   #loadSource   -path "$::DIR_PATH/coregen/TimingGtx.dcp"
+   loadIpCore -path "$::DIR_PATH/coregen/TimingGtx.xci"
    loadIpCore -path "$::DIR_PATH/coregen/TimingGtp.xci"
 
 } else {

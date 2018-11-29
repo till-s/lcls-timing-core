@@ -5,11 +5,11 @@
 -- Description: Wrapper for GTX Core
 -------------------------------------------------------------------------------
 -- This file is part of 'LCLS2 Timing Core'.
--- It is subject to the license terms in the LICENSE.txt file found in the 
--- top-level directory of this distribution and at: 
---    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
--- No part of 'LCLS2 Timing Core', including this file, 
--- may be copied, modified, propagated, or distributed except according to 
+-- It is subject to the license terms in the LICENSE.txt file found in the
+-- top-level directory of this distribution and at:
+--    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+-- No part of 'LCLS2 Timing Core', including this file,
+-- may be copied, modified, propagated, or distributed except according to
 -- the terms contained in the LICENSE.txt file.
 -------------------------------------------------------------------------------
 
@@ -200,6 +200,9 @@ end component TimingGtx;
    signal rxoutclk_out     : sl;
    signal rxoutclkb        : sl;
 
+   signal rxDecErrLoc      : slv(1 downto 0);
+   signal rxDispErrLoc     : slv(1 downto 0);
+
    signal drpClk           : sl;
    signal drpRst           : sl;
    signal drpAddr          : slv(8 downto 0);
@@ -220,6 +223,19 @@ end component TimingGtx;
    signal mAxilWriteSlave  : AxiLiteWriteSlaveType;
    signal mAxilReadMaster  : AxiLiteReadMasterType;
    signal mAxilReadSlave   : AxiLiteReadSlaveType;
+
+   signal probe0           : slv(63 downto 0) := (others => '0');
+   signal probe1           : slv(63 downto 0) := (others => '0');
+
+component Ila_256 is
+    Port (
+      clk : in STD_LOGIC;
+      probe0 : in STD_LOGIC_VECTOR ( 63 downto 0 );
+      probe1 : in STD_LOGIC_VECTOR ( 63 downto 0 );
+      probe2 : in STD_LOGIC_VECTOR ( 63 downto 0 );
+      probe3 : in STD_LOGIC_VECTOR ( 63 downto 0 )
+    );
+end component Ila_256;
 
 begin
 
@@ -318,14 +334,14 @@ begin
          gt0_tx_fsm_reset_done_out       =>      txStatus.resetDone,
          gt0_rx_fsm_reset_done_out       =>      bypassdone,
          gt0_data_valid_in               =>      '1',
- 
+
          --_____________________________________________________________________
          --_____________________________________________________________________
          --GT0  (X1Y0)
- 
+
          --------------------------------- CPLL Ports -------------------------------
-         gt0_cpllfbclklost_out           =>      open,
-         gt0_cplllock_out                =>      open,
+         gt0_cpllfbclklost_out           =>      probe0(0),
+         gt0_cplllock_out                =>      probe0(1),
          gt0_cplllockdetclk_in           =>      stableClk,
          gt0_cpllreset_in                =>      txControl.pllreset,
          -------------------------- Channel - Clocking Ports ------------------------
@@ -357,8 +373,8 @@ begin
          ------------------ Receive Ports - FPGA RX interface Ports -----------------
          gt0_rxdata_out                  =>      rxData,
          ------------------ Receive Ports - RX 8B/10B Decoder Ports -----------------
-         gt0_rxdisperr_out               =>      rxDispErr,
-         gt0_rxnotintable_out            =>      rxDecErr,
+         gt0_rxdisperr_out               =>      rxDispErrLoc,
+         gt0_rxnotintable_out            =>      rxDecErrLoc,
          --------------------------- Receive Ports - RX AFE -------------------------
          gt0_gtxrxp_in                   =>      gtRxP,
          ------------------------ Receive Ports - RX AFE Ports ----------------------
@@ -410,7 +426,7 @@ begin
          gt0_qplloutclk_in               =>      '0',
          gt0_qplloutrefclk_in            =>      '0'
       );
-  
+
 
    TIMING_TXCLK_BUFG : BUFG
       port map (
@@ -424,5 +440,32 @@ begin
 
    txOutClk <= txoutclkb;
    rxOutClk <= rxoutclkb;
+
+   probe0(63 downto 2) <= (others => '0');
+
+   U_ILA_TIMING : component Ila_256
+      port map (
+         clk    => rxoutclkb,
+         probe0( 1 downto  0) => rxDecErrLoc,
+         probe0( 3 downto  2) => rxDispErrLoc,
+         probe0(           4) => bypassdone,
+         probe0(63 downto  5) => (others => '0'),
+         probe1 => (others => '0'),
+         probe2 => (others => '0'),
+         probe3 => (others => '0')
+      );
+
+   rxDecErr  <= rxDecErrLoc;
+   rxDispErr <= rxDispErrLoc;
+
+
+   U_ILA : component Ila_256
+      port map (
+         clk    => axilClk,
+         probe0 => probe0,
+         probe1 => probe1,
+         probe2 => (others => '0'),
+         probe3 => (others => '0')
+      );
 
 end architecture rtl;
