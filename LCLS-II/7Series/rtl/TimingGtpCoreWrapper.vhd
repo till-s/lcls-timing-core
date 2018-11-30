@@ -409,8 +409,8 @@ begin
          ------------- Transmit Ports - TX Initialization and Reset Ports -----------
          gt0_txresetdone_out             =>      open,
 
-         gt0_rxpolarity_in               =>      '0',
-         gt0_txpolarity_in               =>      '0',
+         gt0_rxpolarity_in               =>      rxControl.polarity,
+         gt0_txpolarity_in               =>      txControl.polarity,
  
          gt0_pll0outclk_in               =>      pll0outclk_i,
          gt0_pll0outrefclk_in            =>      pll0outrefclk_i,

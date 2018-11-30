@@ -60,7 +60,6 @@ entity TimingGtxCoreWrapper is
       rxDispErr      : out slv(1 downto 0);
       rxDecErr       : out slv(1 downto 0);
       rxOutClk       : out sl;
-      rxPolInvert    : in  sl := '0';
 
       -- Tx Ports
       txControl      : in  TimingPhyControlType;
@@ -70,7 +69,6 @@ entity TimingGtxCoreWrapper is
       txData         : in  slv(15 downto 0);
       txDataK        : in  slv(1 downto 0);
       txOutClk       : out sl;
-      txPolInvert    : in  sl := '0';
 
       -- Loopback
       loopback       : in slv(2 downto 0));
@@ -395,7 +393,7 @@ begin
          gt0_gtrxreset_in                =>      '0',
          gt0_rxpmareset_in               =>      '0',
          ----------------- Receive Ports - RX Polarity Control Ports ----------------
-         gt0_rxpolarity_in               =>      rxPolInvert,
+         gt0_rxpolarity_in               =>      rxControl.polarity,
          ------------------- Receive Ports - RX8B/10B Decoder Ports -----------------
          gt0_rxcharisk_out               =>      rxDataK,
          -------------- Receive Ports -RX Initialization and Reset Ports ------------
@@ -422,7 +420,7 @@ begin
          ------------- Transmit Ports - TX Initialization and Reset Ports -----------
          gt0_txresetdone_out             =>      open,
          ----------------- Transmit Ports - TX Polarity Control Ports ---------------
-         gt0_txpolarity_in               =>      txPolInvert,
+         gt0_txpolarity_in               =>      txControl.polarity,
          gt0_qplloutclk_in               =>      '0',
          gt0_qplloutrefclk_in            =>      '0'
       );
