@@ -5,7 +5,7 @@
 -- Author     : Matt Weaver  <weaver@slac.stanford.edu>
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2015-09-15
--- Last update: 2018-02-15
+-- Last update: 2018-12-04
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -236,8 +236,8 @@ package TPGPkg is
   
   type TPGConfigType is record
                           clock_step      : slv( 4 downto 0);
-                          clock_remainder : slv( 7 downto 0);
-                          clock_divisor   : slv( 7 downto 0);
+                          clock_remainder : slv(11 downto 0);
+                          clock_divisor   : slv(11 downto 0);
                           txPolarity    : sl;
                           -- AC sync from analog or digital AMC
                           acMaster      : sl;

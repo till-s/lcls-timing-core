@@ -5,7 +5,7 @@
 -- Author     : Matt Weaver  <weaver@slac.stanford.edu>
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2015-11-09
--- Last update: 2018-04-20
+-- Last update: 2018-12-04
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -93,7 +93,9 @@ architecture rtl of TPGMiniReg is
    constant CNTSYNCE   : integer := 322;
    constant CNTINTVL   : integer := 323;
    constant CNTBRT     : integer := 324;
-  
+   constant CLKSTEP    : integer := 325;
+   constant CLKFRAC    : integer := 326;
+   
    type RegType is record
                      pulseId           : slv(31 downto 0);
                      timeStamp         : slv(31 downto 0);
@@ -260,6 +262,9 @@ begin
               end case;
             when CNTINTVL   => v.config.interval    := regWrData;
 --                               v.config.intervalRst := '1';
+            when CLKSTEP    => v.config.clock_step  := regWrData(4 downto 0);
+            when CLKFRAC    => v.config.clock_remainder := regWrData(27 downto 16);
+                               v.config.clock_divisor   := regWrData(11 downto  0);
             when others  => axiWriteResp := AXI_RESP_DECERR_C;
           end case;
         else
@@ -353,6 +358,9 @@ begin
             when CNTSYNCE   => tmpRdData := status.countSyncE;
             when CNTINTVL   => tmpRdData := r.config.interval;
             when CNTBRT     => tmpRdData := status.countBRT;
+            when CLKSTEP    => tmpRdData(4 downto 0) := r.config.clock_step;
+            when CLKFRAC    => tmpRdData := x"0" & r.config.clock_remainder &
+                                            x"0" & r.config.clock_divisor;
             when others     => axiReadResp := AXI_RESP_DECERR_C;
           end case;
           v.axiReadSlave.rdata := tmpRdData;

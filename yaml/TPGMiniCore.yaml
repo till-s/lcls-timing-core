@@ -105,6 +105,33 @@ TPGMiniCore: &TPGMiniCore
       mode: RW
       description: Activates Timestamp register value
     #########################################################
+    ClockPeriodInt:
+      at:
+        offset: 0x0514
+      class: IntField
+      sizeBits: 5
+      lsBit: 0
+      mode: RW
+      description: Clock period nanoseconds integer
+    #########################################################
+    ClockPeriodDiv:
+      at:
+        offset: 0x0518
+      class: IntField
+      sizeBits: 12
+      lsBit: 0
+      mode: RW
+      description: Clock period fractional divisor
+    #########################################################
+    ClockPeriodRem:
+      at:
+        offset: 0x051A
+      class: IntField
+      sizeBits: 12
+      lsBit: 0
+      mode: RW
+      description: Clock period fractional numerator
+    #########################################################
     FixedRateDiv:
       at:
         offset: 0x0018

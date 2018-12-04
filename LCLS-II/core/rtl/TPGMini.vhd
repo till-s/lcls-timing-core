@@ -5,7 +5,7 @@
 -- Author     : Matt Weaver  <weaver@slac.stanford.edu>
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2015-11-09
--- Last update: 2018-04-20
+-- Last update: 2018-12-04
 -- Platform   : 
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -319,16 +319,20 @@ begin
 
   U_ClockTime : entity work.ClockTime
     generic map (
-      TPD_G =>   TPD_G)
+      TPD_G            =>   TPD_G,
+      FRACTION_DEPTH_G => config.clock_remainder'length )
     port map (
-      rst    => txRst,
-      clkA   => txClk,
-      wrEnA  => config.timeStampWrEn,
-      wrData => config.timeStamp,
-      rdData => status.timeStamp,
-      clkB   => txClk,
-      wrEnB  => baseEnable,
-      dataO  => frame.timeStamp);
+      step      => config.clock_step,
+      remainder => config.clock_remainder,
+      divisor   => config.clock_divisor,
+      rst       => txRst,
+      clkA      => txClk,
+      wrEnA     => config.timeStampWrEn,
+      wrData    => config.timeStamp,
+      rdData    => status.timeStamp,
+      clkB      => txClk,
+      wrEnB     => baseEnable,
+      dataO     => frame.timeStamp);
 
   statusO <= status;
   config  <= configI;
