@@ -130,6 +130,36 @@ class TPGMiniCore(pr.Device):
             mode         = "RW",
         ))        
                 
+        self.add(pr.RemoteVariable(    
+            name         = "ClockPeriodInt",
+            description  = "Clock period nanoseconds integer",
+            offset       = 0x514,
+            bitSize      = 5,
+            bitOffset    = 0,
+            base         = pr.UInt,
+            mode         = "RW",
+        ))        
+                
+        self.add(pr.RemoteVariable(    
+            name         = "ClockPeriodDiv",
+            description  = "Clock period fractional divisor",
+            offset       = 0x518,
+            bitSize      = 12,
+            bitOffset    = 0,
+            base         = pr.UInt,
+            mode         = "RW",
+        ))        
+                
+        self.add(pr.RemoteVariable(    
+            name         = "ClockPeriodRem",
+            description  = "Clock period fractional numerator",
+            offset       = 0x51A,
+            bitSize      = 12,
+            bitOffset    = 0,
+            base         = pr.UInt,
+            mode         = "RW",
+        ))        
+                
         self.addRemoteVariables(    
             name         = "FixedRateDiv",
             description  = "Fixed rate marker divisors",
