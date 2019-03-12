@@ -25,7 +25,7 @@ use work.TimingPkg.all;
 library unisim;
 use unisim.vcomponents.all;
 
-entity TimingGtxCoreWrapper is
+entity TimingGtCoreWrapper is
    generic (
       TPD_G            : time    := 1 ns;
       EXTREF_G         : boolean := false;
@@ -72,113 +72,72 @@ entity TimingGtxCoreWrapper is
 
       -- Loopback
       loopback       : in slv(2 downto 0));
-end entity TimingGtxCoreWrapper;
+end entity TimingGtCoreWrapper;
 
-architecture rtl of TimingGtxCoreWrapper is
+architecture rtl of TimingGtCoreWrapper is
 
-component TimingGtx
-port (
-    SYSCLK_IN                               : in   std_logic;
-    SOFT_RESET_TX_IN                        : in   std_logic;
-    SOFT_RESET_RX_IN                        : in   std_logic;
-    DONT_RESET_ON_DATA_ERROR_IN             : in   std_logic;
-    GT0_TX_FSM_RESET_DONE_OUT               : out  std_logic;
-    GT0_RX_FSM_RESET_DONE_OUT               : out  std_logic;
-    GT0_DATA_VALID_IN                       : in   std_logic;
-
-    --_________________________________________________________________________
-    --GT0  (X1Y0)
-    --____________________________CHANNEL PORTS________________________________
-    --------------------------------- CPLL Ports -------------------------------
-    gt0_cpllfbclklost_out                   : out  std_logic;
-    gt0_cplllock_out                        : out  std_logic;
-    gt0_cplllockdetclk_in                   : in   std_logic;
-    gt0_cpllreset_in                        : in   std_logic;
-    -------------------------- Channel - Clocking Ports ------------------------
-    gt0_gtrefclk0_in                        : in   std_logic;
-    gt0_gtrefclk1_in                        : in   std_logic;
-    ---------------------------- Channel - DRP Ports  --------------------------
-    gt0_drpaddr_in                          : in   std_logic_vector(8 downto 0);
-    gt0_drpclk_in                           : in   std_logic;
-    gt0_drpdi_in                            : in   std_logic_vector(15 downto 0);
-    gt0_drpdo_out                           : out  std_logic_vector(15 downto 0);
-    gt0_drpen_in                            : in   std_logic;
-    gt0_drprdy_out                          : out  std_logic;
-    gt0_drpwe_in                            : in   std_logic;
-    --------------------------- Digital Monitor Ports --------------------------
-    gt0_dmonitorout_out                     : out  std_logic_vector(7 downto 0);
-    ------------------------------- Loopback Ports -----------------------------
-    gt0_loopback_in                         : in   std_logic_vector(2 downto 0);
-    --------------------- RX Initialization and Reset Ports --------------------
-    gt0_eyescanreset_in                     : in   std_logic;
-    gt0_rxuserrdy_in                        : in   std_logic;
-    -------------------------- RX Margin Analysis Ports ------------------------
-    gt0_eyescandataerror_out                : out  std_logic;
-    gt0_eyescantrigger_in                   : in   std_logic;
-    ------------------------- Receive Ports - CDR Ports ------------------------
-    gt0_rxcdrovrden_in                      : in   std_logic;
-    ------------------ Receive Ports - FPGA RX Interface Ports -----------------
-    gt0_rxusrclk_in                         : in   std_logic;
-    gt0_rxusrclk2_in                        : in   std_logic;
-    ------------------ Receive Ports - FPGA RX interface Ports -----------------
-    gt0_rxdata_out                          : out  std_logic_vector(15 downto 0);
-    ------------------ Receive Ports - RX 8B/10B Decoder Ports -----------------
-    gt0_rxdisperr_out                       : out  std_logic_vector(1 downto 0);
-    gt0_rxnotintable_out                    : out  std_logic_vector(1 downto 0);
-    --------------------------- Receive Ports - RX AFE -------------------------
-    gt0_gtxrxp_in                           : in   std_logic;
-    ------------------------ Receive Ports - RX AFE Ports ----------------------
-    gt0_gtxrxn_in                           : in   std_logic;
-    ------------------- Receive Ports - RX Buffer Bypass Ports -----------------
-    gt0_rxbufreset_in                       : in   std_logic;
-    gt0_rxbufstatus_out                     : out  std_logic_vector(2 downto 0);
-    gt0_rxphmonitor_out                     : out  std_logic_vector(4 downto 0);
-    gt0_rxphslipmonitor_out                 : out  std_logic_vector(4 downto 0);
-    --------------------- Receive Ports - RX Equalizer Ports -------------------
-    gt0_rxdfelpmreset_in                    : in   std_logic;
-    gt0_rxmonitorout_out                    : out  std_logic_vector(6 downto 0);
-    gt0_rxmonitorsel_in                     : in   std_logic_vector(1 downto 0);
-    --------------- Receive Ports - RX Fabric Output Control Ports -------------
-    gt0_rxoutclk_out                        : out  std_logic;
-    gt0_rxoutclkfabric_out                  : out  std_logic;
-    ------------- Receive Ports - RX Initialization and Reset Ports ------------
-    gt0_gtrxreset_in                        : in   std_logic;
-    gt0_rxpmareset_in                       : in   std_logic;
-    ----------------- Receive Ports - RX Polarity Control Ports ----------------
-    gt0_rxpolarity_in                       : in   std_logic;
-    ------------------- Receive Ports - RX8B/10B Decoder Ports -----------------
-    gt0_rxcharisk_out                       : out  std_logic_vector(1 downto 0);
-    -------------- Receive Ports -RX Initialization and Reset Ports ------------
-    gt0_rxresetdone_out                     : out  std_logic;
-    --------------------- TX Initialization and Reset Ports --------------------
-    gt0_gttxreset_in                        : in   std_logic;
-    gt0_txuserrdy_in                        : in   std_logic;
-    ------------------ Transmit Ports - FPGA TX Interface Ports ----------------
-    gt0_txusrclk_in                         : in   std_logic;
-    gt0_txusrclk2_in                        : in   std_logic;
-    ---------------------- Transmit Ports - TX Buffer Ports --------------------
-    gt0_txbufstatus_out                     : out  std_logic_vector(1 downto 0);
-    ------------------ Transmit Ports - TX Data Path interface -----------------
-    gt0_txdata_in                           : in   std_logic_vector(15 downto 0);
-    ---------------- Transmit Ports - TX Driver and OOB signaling --------------
-    gt0_gtxtxn_out                          : out  std_logic;
-    gt0_gtxtxp_out                          : out  std_logic;
-    ----------- Transmit Ports - TX Fabric Clock Output Control Ports ----------
-    gt0_txoutclk_out                        : out  std_logic;
-    gt0_txoutclkfabric_out                  : out  std_logic;
-    gt0_txoutclkpcs_out                     : out  std_logic;
-    --------------------- Transmit Ports - TX Gearbox Ports --------------------
-    gt0_txcharisk_in                        : in   std_logic_vector(1 downto 0);
-    ------------- Transmit Ports - TX Initialization and Reset Ports -----------
-    gt0_txresetdone_out                     : out  std_logic;
-    ----------------- Transmit Ports - TX Polarity Control Ports ---------------
-    gt0_txpolarity_in                       : in   std_logic;
-
-    --____________________________COMMON PORTS________________________________
-     GT0_QPLLOUTCLK_IN  : in std_logic;
-     GT0_QPLLOUTREFCLK_IN : in std_logic
-);
-end component TimingGtx;
+   component TimingGtx
+      port (
+         SYSCLK_IN : in STD_LOGIC;
+         SOFT_RESET_TX_IN : in STD_LOGIC;
+         SOFT_RESET_RX_IN : in STD_LOGIC;
+         DONT_RESET_ON_DATA_ERROR_IN : in STD_LOGIC;
+         GT0_TX_FSM_RESET_DONE_OUT : out STD_LOGIC;
+         GT0_RX_FSM_RESET_DONE_OUT : out STD_LOGIC;
+         GT0_DATA_VALID_IN : in STD_LOGIC;
+         gt0_cpllfbclklost_out : out STD_LOGIC;
+         gt0_cplllock_out : out STD_LOGIC;
+         gt0_cplllockdetclk_in : in STD_LOGIC;
+         gt0_cpllreset_in : in STD_LOGIC;
+         gt0_gtrefclk0_in : in STD_LOGIC;
+         gt0_gtrefclk1_in : in STD_LOGIC;
+         gt0_drpaddr_in : in STD_LOGIC_VECTOR ( 8 downto 0 );
+         gt0_drpclk_in : in STD_LOGIC;
+         gt0_drpdi_in : in STD_LOGIC_VECTOR ( 15 downto 0 );
+         gt0_drpdo_out : out STD_LOGIC_VECTOR ( 15 downto 0 );
+         gt0_drpen_in : in STD_LOGIC;
+         gt0_drprdy_out : out STD_LOGIC;
+         gt0_drpwe_in : in STD_LOGIC;
+         gt0_dmonitorout_out : out STD_LOGIC_VECTOR ( 7 downto 0 );
+         gt0_loopback_in : in STD_LOGIC_VECTOR ( 2 downto 0 );
+         gt0_eyescanreset_in : in STD_LOGIC;
+         gt0_rxuserrdy_in : in STD_LOGIC;
+         gt0_eyescandataerror_out : out STD_LOGIC;
+         gt0_eyescantrigger_in : in STD_LOGIC;
+         gt0_rxusrclk_in : in STD_LOGIC;
+         gt0_rxusrclk2_in : in STD_LOGIC;
+         gt0_rxdata_out : out STD_LOGIC_VECTOR ( 15 downto 0 );
+         gt0_rxdisperr_out : out STD_LOGIC_VECTOR ( 1 downto 0 );
+         gt0_rxnotintable_out : out STD_LOGIC_VECTOR ( 1 downto 0 );
+         gt0_gtxrxp_in : in STD_LOGIC;
+         gt0_gtxrxn_in : in STD_LOGIC;
+         gt0_rxphmonitor_out : out STD_LOGIC_VECTOR ( 4 downto 0 );
+         gt0_rxphslipmonitor_out : out STD_LOGIC_VECTOR ( 4 downto 0 );
+         gt0_rxdfelpmreset_in : in STD_LOGIC;
+         gt0_rxmonitorout_out : out STD_LOGIC_VECTOR ( 6 downto 0 );
+         gt0_rxmonitorsel_in : in STD_LOGIC_VECTOR ( 1 downto 0 );
+         gt0_rxoutclk_out : out STD_LOGIC;
+         gt0_rxoutclkfabric_out : out STD_LOGIC;
+         gt0_gtrxreset_in : in STD_LOGIC;
+         gt0_rxpmareset_in : in STD_LOGIC;
+         gt0_rxcharisk_out : out STD_LOGIC_VECTOR ( 1 downto 0 );
+         gt0_rxresetdone_out : out STD_LOGIC;
+         gt0_gttxreset_in : in STD_LOGIC;
+         gt0_txuserrdy_in : in STD_LOGIC;
+         gt0_txusrclk_in : in STD_LOGIC;
+         gt0_txusrclk2_in : in STD_LOGIC;
+         gt0_txdata_in : in STD_LOGIC_VECTOR ( 15 downto 0 );
+         gt0_gtxtxn_out : out STD_LOGIC;
+         gt0_gtxtxp_out : out STD_LOGIC;
+         gt0_txoutclk_out : out STD_LOGIC;
+         gt0_txoutclkfabric_out : out STD_LOGIC;
+         gt0_txoutclkpcs_out : out STD_LOGIC;
+         gt0_txcharisk_in : in STD_LOGIC_VECTOR ( 1 downto 0 );
+         gt0_txresetdone_out : out STD_LOGIC;
+         GT0_QPLLOUTCLK_IN : in STD_LOGIC;
+         GT0_QPLLOUTREFCLK_IN : in STD_LOGIC
+      );
+   end component TimingGtx;
 
    constant AXI_CROSSBAR_MASTERS_CONFIG_C : AxiLiteCrossbarMasterConfigArray(1 downto 0) := (
       0               => (
@@ -363,8 +322,6 @@ begin
          -------------------------- RX Margin Analysis Ports ------------------------
          gt0_eyescandataerror_out        =>      open,
          gt0_eyescantrigger_in           =>      '0',
-         ------------------------- Receive Ports - CDR Ports ------------------------
-         gt0_rxcdrovrden_in              =>      '0',
          ------------------ Receive Ports - FPGA RX Interface Ports -----------------
          gt0_rxusrclk_in                 =>      rxUsrClk,
          gt0_rxusrclk2_in                =>      rxUsrClk,
@@ -378,9 +335,6 @@ begin
          ------------------------ Receive Ports - RX AFE Ports ----------------------
          gt0_gtxrxn_in                   =>      gtRxN,
          ------------------- Receive Ports - RX Buffer Bypass Ports -----------------
-         gt0_rxbufreset_in               =>      '0',
-         gt0_rxbufstatus_out             =>      open,
-         gt0_rxphmonitor_out             =>      open,
          gt0_rxphslipmonitor_out         =>      open,
          --------------------- Receive Ports - RX Equalizer Ports -------------------
          gt0_rxdfelpmreset_in            =>      '0',
@@ -392,8 +346,6 @@ begin
          ------------- Receive Ports - RX Initialization and Reset Ports ------------
          gt0_gtrxreset_in                =>      '0',
          gt0_rxpmareset_in               =>      '0',
-         ----------------- Receive Ports - RX Polarity Control Ports ----------------
-         gt0_rxpolarity_in               =>      rxControl.polarity,
          ------------------- Receive Ports - RX8B/10B Decoder Ports -----------------
          gt0_rxcharisk_out               =>      rxDataK,
          -------------- Receive Ports -RX Initialization and Reset Ports ------------
@@ -404,8 +356,6 @@ begin
          ------------------ Transmit Ports - FPGA TX Interface Ports ----------------
          gt0_txusrclk_in                 =>      txUsrClk,
          gt0_txusrclk2_in                =>      txUsrClk,
-         ---------------------- Transmit Ports - TX Buffer Ports --------------------
-         gt0_txbufstatus_out             =>      open,
          ------------------ Transmit Ports - TX Data Path interface -----------------
          gt0_txdata_in                   =>      txData,
          ---------------- Transmit Ports - TX Driver and OOB signaling --------------
@@ -420,7 +370,6 @@ begin
          ------------- Transmit Ports - TX Initialization and Reset Ports -----------
          gt0_txresetdone_out             =>      open,
          ----------------- Transmit Ports - TX Polarity Control Ports ---------------
-         gt0_txpolarity_in               =>      txControl.polarity,
          gt0_qplloutclk_in               =>      '0',
          gt0_qplloutrefclk_in            =>      '0'
       );
