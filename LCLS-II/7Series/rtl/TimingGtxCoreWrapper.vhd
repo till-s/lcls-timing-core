@@ -134,6 +134,8 @@ architecture rtl of TimingGtCoreWrapper is
          gt0_txoutclkpcs_out : out STD_LOGIC;
          gt0_txcharisk_in : in STD_LOGIC_VECTOR ( 1 downto 0 );
          gt0_txresetdone_out : out STD_LOGIC;
+         gt0_txpolarity_in   : in  STD_LOGIC;
+         gt0_rxpolarity_in   : in  STD_LOGIC;
          GT0_QPLLOUTCLK_IN : in STD_LOGIC;
          GT0_QPLLOUTREFCLK_IN : in STD_LOGIC
       );
@@ -370,6 +372,8 @@ begin
          ------------- Transmit Ports - TX Initialization and Reset Ports -----------
          gt0_txresetdone_out             =>      open,
          ----------------- Transmit Ports - TX Polarity Control Ports ---------------
+         gt0_txpolarity_in               =>      txControl.polarity,
+         gt0_rxpolarity_in               =>      rxControl.polarity,
          gt0_qplloutclk_in               =>      '0',
          gt0_qplloutrefclk_in            =>      '0'
       );
