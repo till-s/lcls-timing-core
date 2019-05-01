@@ -41,7 +41,9 @@ entity TPGMini is
     txRst      : in  sl;
     txRdy      : in  sl;
     txData     : out slv(15 downto 0);
-    txDataK    : out slv(1 downto 0)
+    txDataK    : out slv(1 downto 0);
+    dTrigO     : out DbgTrigType;
+    dTrigI     : in  DbgTrigType
     );
 end TPGMini;
 
@@ -207,7 +209,7 @@ begin
                streamIds => streamIds,
                advance   => advance,
                data      => txData,
-               dataK     => txDataK );
+               dataK     => txDataK, dTrigI => dTrigI, dTrigO => dTrigO );
   
   U_TPSerializer : entity work.TPSerializer
     generic map ( TPD_G => TPD_G, Id => TPG_ID )

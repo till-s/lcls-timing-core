@@ -66,7 +66,9 @@ entity TimingRx is
       axilReadMaster      : in  AxiLiteReadMasterType;
       axilReadSlave       : out AxiLiteReadSlaveType;
       axilWriteMaster     : in  AxiLiteWriteMasterType;
-      axilWriteSlave      : out AxiLiteWriteSlaveType
+      axilWriteSlave      : out AxiLiteWriteSlaveType;
+      dTrigI              : in  DbgTrigType;
+      dTrigO              : out DbgTrigType
       );
 
 end entity TimingRx;
@@ -194,7 +196,7 @@ begin
         timingExtn          => timingExtn,
         timingExtnValid     => timingExtnValid,
         rxVersion           => rxVersion(1),
-        staData             => staData  (1) );
+        staData             => staData  (1), dTrigI => dTrigI, dTrigO => dTrigO );
   end generate;
    
    axilComb : process (axilR, axilReadMaster, axilRst,

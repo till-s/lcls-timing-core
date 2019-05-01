@@ -25,6 +25,9 @@ use ieee.std_logic_1164.all;
 use work.StdRtlPkg.all;
 use work.TimingPkg.all;
 use work.CrcPkg.all;
+use work.Ila_256Pkg.all;
+
+library xil_defaultlib;
 
 entity TimingSerializer is
    generic (
@@ -39,6 +42,8 @@ entity TimingSerializer is
       streamIds : in  Slv4Array        (STREAMS_C-1 downto 0);
       advance   : out slv              (STREAMS_C-1 downto 0);
       data      : out slv(15 downto 0);
+      dTrigO    : out DbgTrigType := DTRIG_INIT_C;
+      dTrigI    : in  DbgTrigType := DTRIG_INIT_C;
       dataK     : out slv(1 downto 0));
 end TimingSerializer;
 
@@ -71,14 +76,19 @@ architecture TimingSerializer of TimingSerializer is
   signal r   : RegType := REG_INIT_C;
   signal rin : RegType;
   signal crc : slv(31 downto 0);
+  signal dataLoc : slv(15 downto 0);
+  signal dataKLoc : slv(1 downto 0);
   
 begin
 
   advance  <= rin.advance;
-  data     <= crc(15 downto  0) when r.state=CRC2_S else
+  dataLoc     <= crc(15 downto  0) when r.state=CRC2_S else
               crc(31 downto 16) when r.state=CRC3_S else
               r.data;
-  dataK    <= r.dataK;
+  dataKLoc    <= r.dataK;
+  
+  data  <= dataLoc;
+  dataK <= dataKLoc;
   
   
   U_CRC : entity work.Crc32Parallel
@@ -89,6 +99,35 @@ begin
                crcDataWidth => "001",
                crcIn        => rin.data,
                crcReset     => r.crcReset );
+
+  U_Ila : component work.Ila_256Pkg.Ila_256
+    port map (
+      clk          => clk,
+      trig_out     => dTrigO.sig,
+      trig_out_ack => dTrigI.ack,
+      trig_in      => dTrigI.sig,
+      trig_in_ack  => dTrigO.ack,
+      probe0(15 downto  0) => r.data,
+      probe0(17 downto 16) => r.dataK,
+      probe0(18          ) => r.crcReset,
+      probe0(19          ) => r.crcValid,
+      probe0(20          ) => fiducial,
+      probe0(21          ) => r.advance(0),
+      probe0(31 downto 22) => (others => '0'),
+      probe0(63 downto 32) => crc,
+
+      probe1(15 downto  0) => dataLoc,
+      probe1(17 downto 16) => dataKLoc,
+      probe1(18          ) => streams(0).ready,
+      probe1(19          ) => streams(0).last,
+      probe1(23 downto 20) => streamIds(0),
+      probe1(30 downto 24) => streams(0).offset,
+      probe1(31          ) => '0',
+      probe1(47 downto 32) => streams(0).data,
+      probe1(63 downto 48) => (others => '0'),
+      probe2       => (others => '0'),
+      probe3       => (others => '0')
+    );
   
   comb: process (rst, fiducial, streams, streamIds, r)
     variable v    : RegType;

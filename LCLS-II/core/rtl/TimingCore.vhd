@@ -145,6 +145,8 @@ architecture rtl of TimingCore is
    signal timingExtnValid     : sl;
    signal extnSlv, appExtnSlv : slv(TIMING_EXTN_BITS_C-1 downto 0);
    signal appExtnValid        : sl;
+
+   signal dTrigTxO, dTrigTxI, dTrigRxO, dTrigRxI : DbgTrigType;
    
 begin
 
@@ -179,6 +181,9 @@ begin
    timingRx.decErr <= gtRxDecErr;
    timingRx.dspErr <= gtRxDispErr;
    timingClkSel    <= clkSel;
+
+   dTrigRxI <= dTrigTxO;
+   dTrigTxI <= dTrigRxO;
    
    U_TimingRx : entity work.TimingRx
       generic map (
@@ -208,7 +213,7 @@ begin
          axilReadMaster      => locAxilReadMasters (FRAME_RX_AXIL_INDEX_C),
          axilReadSlave       => locAxilReadSlaves (FRAME_RX_AXIL_INDEX_C),
          axilWriteMaster     => locAxilWriteMasters(FRAME_RX_AXIL_INDEX_C),
-         axilWriteSlave      => locAxilWriteSlaves (FRAME_RX_AXIL_INDEX_C));
+         axilWriteSlave      => locAxilWriteSlaves (FRAME_RX_AXIL_INDEX_C), dTrigI => dTrigRxI, dTrigO => dTrigRxO);
 
    GEN_AXIL_RINGB : if AXIL_RINGB_G generate
       -------------------------------------------------------------------------------------------------
@@ -294,6 +299,8 @@ begin
             axiReadMaster  => locAxilReadMasters (FRAME_TX_AXIL_INDEX_C),
             axiReadSlave   => locAxilReadSlaves (FRAME_TX_AXIL_INDEX_C),
             axiWriteMaster => locAxilWriteMasters(FRAME_TX_AXIL_INDEX_C),
+            dTrigI         => dTrigTxI,
+            dTrigO         => dTrigTxO,
             axiWriteSlave  => locAxilWriteSlaves (FRAME_TX_AXIL_INDEX_C));
 
       U_SyncClkSel : entity work.Synchronizer

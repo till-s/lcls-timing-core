@@ -267,6 +267,16 @@ package TimingPkg is
       timeStamp  => (others=>'0'),
       bsa        => (others=>'0'),
       dmod       => (others=>'0') );
+
+   type DbgTrigType is record
+      sig : sl;
+      ack : sl;
+   end record;
+
+   constant DTRIG_INIT_C : DbgTrigType := (
+      sig => '0',
+      ack => '1'
+   );
  
 end package TimingPkg;
 

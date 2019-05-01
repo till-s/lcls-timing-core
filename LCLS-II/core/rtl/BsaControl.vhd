@@ -102,7 +102,7 @@ begin
             if bsadef.avgToWr = x"0000" then
                persist <= '1' after TPD_G;
             end if;
-            restart <= bsadef.restart after TPD_G;
+            restart <= '0'; -- bsadef has no restart member bsadef.restart after TPD_G;
          end if;
       end if;
    end process;

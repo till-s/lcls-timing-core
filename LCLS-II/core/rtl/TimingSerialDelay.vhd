@@ -26,6 +26,7 @@ use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 use work.StdRtlPkg.all;
 use work.TimingPkg.all;
+use work.Ila_256Pkg.all;
 
 entity TimingSerialDelay is
    generic ( TPD_G         : time    := 1 ns;
@@ -91,6 +92,9 @@ architecture TimingSerialDelay of TimingSerialDelay is
   signal firstW    : sl;
   signal wr_cnt    : sl;
 
+  signal dbg       : slv(3*MADDR_WIDTH_C - 1 downto 0);
+  signal dbgStat   : slv(7 downto 0);
+
   attribute use_dsp48      : string;
   attribute use_dsp48 of r : signal is "yes";  
   
@@ -136,7 +140,26 @@ begin
                 dout(15 downto 0) => dout_msg,
                 dout(16)          => firstW,
                 valid             => valid_msg,
-                overflow          => full_msg );
+                overflow          => full_msg, dbg => dbg, dbgStat => dbgStat );
+
+  U_Ila : component work.Ila_256Pkg.Ila_256
+    port map (
+      clk          => clk,
+      probe0(MADDR_WIDTH_C - 1 downto  0) => dbg(1*MADDR_WIDTH_C - 1 downto 0*MADDR_WIDTH_C),
+      probe0(63 downto MADDR_WIDTH_C) => (others => '0'),
+      probe1(MADDR_WIDTH_C - 1 downto  0) => dbg(2*MADDR_WIDTH_C - 1 downto 1*MADDR_WIDTH_C),
+      probe1(63 downto MADDR_WIDTH_C) => (others => '0'),
+      probe2(MADDR_WIDTH_C - 1 downto  0) => dbg(3*MADDR_WIDTH_C - 1 downto 2*MADDR_WIDTH_C),
+      probe2(63 downto MADDR_WIDTH_C) => (others => '0'),
+      probe3(0)    => advance_i,
+      probe3(1)    => rin.rd_msg,
+      probe3(2)    => valid_msg,
+      probe3(3)    => full_msg,
+      probe3(4)    => r.fifoRst,
+      probe3( 7 downto  5) => (others => '0'),
+      probe3(15 downto  8) => dbgStat,
+      probe3(63 downto 16) => (others => '0')
+    );
 
    process (r, rst, delay, valid_cnt, dout_cnt, valid_msg, dout_msg, dout_rdy, firstW, fiducial_i, advance_i ) is
      variable v : RegType;

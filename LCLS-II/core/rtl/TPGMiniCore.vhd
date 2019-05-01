@@ -27,6 +27,7 @@ use work.StdRtlPkg.all;
 use work.AxiLitePkg.all;
 use work.TPGPkg.all;
 use work.TPGMiniEdefPkg.all;
+use work.TimingPkg.all;
 
 entity TPGMiniCore is
    generic (
@@ -47,7 +48,7 @@ entity TPGMiniCore is
      axiReadMaster   : in  AxiLiteReadMasterType;
      axiReadSlave    : out AxiLiteReadSlaveType;
      axiWriteMaster  : in  AxiLiteWriteMasterType;
-     axiWriteSlave   : out AxiLiteWriteSlaveType );
+     axiWriteSlave   : out AxiLiteWriteSlaveType; dTrigI : in DbgTrigType; dTrigO : out DbgTrigType);
 end TPGMiniCore;
 
 architecture rtl of TPGMiniCore is
@@ -122,7 +123,7 @@ begin  -- rtl
          txRst          => txRst,
          txRdy          => txRdy,
          txData         => txData (1),
-         txDataK        => txDataK(1) );
+         txDataK        => txDataK(1), dTrigI => dTrigI, dTrigO => dTrigO );
 
    TPGMiniStream_Inst : entity work.TPGMiniStream
       generic map (

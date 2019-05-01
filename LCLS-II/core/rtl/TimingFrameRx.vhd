@@ -47,7 +47,7 @@ entity TimingFrameRx is
       timingExtnValid     : out sl;
 
       rxVersion           : out slv(31 downto 0);
-      staData             : out slv(4 downto 0)
+      staData             : out slv(4 downto 0); dTrigI : in DbgTrigType; dTrigO : out DbgTrigType
       );
 end entity TimingFrameRx;
 
@@ -99,7 +99,7 @@ begin
                  data      => rxData,
                  sof       => sof,
                  eof       => eof,
-                 crcErr    => crcErr );
+                 crcErr    => crcErr, dTrigI => dTrigI, dTrigO => dTrigO );
 
    U_Delay0 : entity work.TimingSerialDelay
      generic map ( TPD_G=>TPD_G, NWORDS_G => TIMING_MESSAGE_WORDS_C,

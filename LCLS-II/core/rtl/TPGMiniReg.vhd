@@ -175,6 +175,8 @@ begin
       variable tmpRdData    : slv(31 downto 0);
       variable regAddr      : slv(31 downto 2);
       variable bsaClear     : slv(63 downto 0);
+      variable foo          : slv( 1 downto 0);
+      variable boo          : slv( 1 downto 0);
    begin
       -- Latch the current value
       v := r;
@@ -241,26 +243,46 @@ begin
               for i in 0 to NARRAYS_BSA-1 loop
                 v.config.bsadefv(i).init := regWrData(i);
               end loop;
-            when BSADEF to BSADEF_END =>
-              iseq               := conv_integer(regAddr(8 downto 4));
-              case regAddr(3 downto 2) is
-                when "00" => v.bsadefRateMode (iseq) := regWrData( 1 downto  0);
-                             v.bsaDefFixedRate(iseq) := regWrData( 5 downto  2);
-                             v.bsaDefACRate   (iseq) := regWrData( 8 downto  6);
-                             v.bsaDefACTSMask (iseq) := regWrData(14 downto  9);
-                             v.bsaDefSeqSel   (iseq) := regWrData(19 downto 15);
-                             v.bsaDefSeqBit   (iseq) := regWrData(23 downto 20);
-                             v.bsaDefDestMode (iseq) := regWrData(25 downto 24);
-                when "01" => v.bsadefDestInclM(iseq) := regWrData(15 downto  0);
-                             v.bsaDefDestExclM(iseq) := regWrData(31 downto 16);
-                when "10" => v.bsadefNToAvg   (iseq) := regWrData(12 downto  0);
-                             v.bsaDefMaxSevr  (iseq) := regWrData(15 downto 14);
-                             v.bsaDefAvgToWr  (iseq) := regWrData(31 downto 16);
-                when others => null;
-              end case;
+--            when BSADEF to BSADEF_END =>
+--              iseq               := conv_integer(regAddr(8 downto 4));
+--              case regAddr(3 downto 2) is
+--                when "00" => v.bsadefRateMode (iseq) := regWrData( 1 downto  0);
+--                             v.bsaDefFixedRate(iseq) := regWrData( 5 downto  2);
+--                             v.bsaDefACRate   (iseq) := regWrData( 8 downto  6);
+--                             v.bsaDefACTSMask (iseq) := regWrData(14 downto  9);
+--                             v.bsaDefSeqSel   (iseq) := regWrData(19 downto 15);
+--                             v.bsaDefSeqBit   (iseq) := regWrData(23 downto 20);
+--                             v.bsaDefDestMode (iseq) := regWrData(25 downto 24);
+--                when "01" => v.bsadefDestInclM(iseq) := regWrData(15 downto  0);
+--                             v.bsaDefDestExclM(iseq) := regWrData(31 downto 16);
+--                when "10" => v.bsadefNToAvg   (iseq) := regWrData(12 downto  0);
+--                             v.bsaDefMaxSevr  (iseq) := regWrData(15 downto 14);
+--                             v.bsaDefAvgToWr  (iseq) := regWrData(31 downto 16);
+--                when others => null;
+--              end case;
             when CNTINTVL   => v.config.interval    := regWrData;
 --                               v.config.intervalRst := '1';
-            when others  => axiWriteResp := AXI_RESP_DECERR_C;
+            when others  => 
+               if wrPntr >= BSADEF and wrPntr <= BSADEF_END then
+                  iseq               := conv_integer(regAddr(8 downto 4));
+                  case regAddr(3 downto 2) is
+                    when "00" => v.bsadefRateMode (iseq) := regWrData( 1 downto  0);
+                                 v.bsaDefFixedRate(iseq) := regWrData( 5 downto  2);
+                                 v.bsaDefACRate   (iseq) := regWrData( 8 downto  6);
+                                 v.bsaDefACTSMask (iseq) := regWrData(14 downto  9);
+                                 v.bsaDefSeqSel   (iseq) := regWrData(19 downto 15);
+                                 v.bsaDefSeqBit   (iseq) := regWrData(23 downto 20);
+                                 v.bsaDefDestMode (iseq) := regWrData(25 downto 24);
+                    when "01" => v.bsadefDestInclM(iseq) := regWrData(15 downto  0);
+                                 v.bsaDefDestExclM(iseq) := regWrData(31 downto 16);
+                    when "10" => v.bsadefNToAvg   (iseq) := regWrData(12 downto  0);
+                                 v.bsaDefMaxSevr  (iseq) := regWrData(15 downto 14);
+                                 v.bsaDefAvgToWr  (iseq) := regWrData(31 downto 16);
+                    when others => null;
+                  end case;
+               else
+                  axiWriteResp := AXI_RESP_DECERR_C;
+               end if;
           end case;
         else
           axiWriteResp := AXI_RESP_DECERR_C;
@@ -328,23 +350,23 @@ begin
               for i in 0 to NARRAYS_BSA-1 loop
                 tmpRdData(i) := r.config.bsadefv(i).init;
               end loop;
-            when BSADEF to BSADEF_END =>
-              iseq      := conv_integer(regAddr(8 downto 4));
-              case regAddr(3 downto 2) is
-                when "00" => tmpRdData( 1 downto  0) := r.bsadefRateMode (iseq);
-                             tmpRdData( 5 downto  2) := r.bsaDefFixedRate(iseq);
-                             tmpRdData( 8 downto  6) := r.bsaDefACRate   (iseq);
-                             tmpRdData(14 downto  9) := r.bsaDefACTSMask (iseq); 
-                             tmpRdData(19 downto 15) := r.bsaDefSeqSel   (iseq); 
-                             tmpRdData(23 downto 20) := r.bsaDefSeqBit   (iseq); 
-                             tmpRdData(25 downto 24) := r.bsaDefDestMode (iseq); 
-                when "01" => tmpRdData(15 downto  0) := r.bsadefDestInclM(iseq); 
-                             tmpRdData(31 downto 16) := r.bsaDefDestExclM(iseq); 
-                when "10" => tmpRdData(12 downto  0) := r.bsadefNToAvg   (iseq); 
-                             tmpRdData(15 downto 14) := r.bsaDefMaxSevr  (iseq); 
-                             tmpRdData(31 downto 16) := r.bsaDefAvgToWr  (iseq); 
-                when others => null;
-              end case;
+--            when BSADEF to BSADEF_END =>
+--              iseq      := conv_integer(regAddr(8 downto 4));
+--              case regAddr(3 downto 2) is
+--                when "00" => tmpRdData( 1 downto  0) := r.bsadefRateMode (iseq);
+--                             tmpRdData( 5 downto  2) := r.bsaDefFixedRate(iseq);
+--                             tmpRdData( 8 downto  6) := r.bsaDefACRate   (iseq);
+--                             tmpRdData(14 downto  9) := r.bsaDefACTSMask (iseq); 
+--                             tmpRdData(19 downto 15) := r.bsaDefSeqSel   (iseq); 
+--                             tmpRdData(23 downto 20) := r.bsaDefSeqBit   (iseq); 
+--                             tmpRdData(25 downto 24) := r.bsaDefDestMode (iseq); 
+--                when "01" => tmpRdData(15 downto  0) := r.bsadefDestInclM(iseq); 
+--                             tmpRdData(31 downto 16) := r.bsaDefDestExclM(iseq); 
+--                when "10" => tmpRdData(12 downto  0) := r.bsadefNToAvg   (iseq); 
+--                             tmpRdData(15 downto 14) := r.bsaDefMaxSevr  (iseq); 
+--                             tmpRdData(31 downto 16) := r.bsaDefAvgToWr  (iseq); 
+--                when others => null;
+--              end case;
             when BSASTATUS to BSASTATUS_END =>
               iseq      := conv_integer(regAddr(7 downto 2));
               tmpRdData := status.bsastatus(iseq);
@@ -353,7 +375,27 @@ begin
             when CNTSYNCE   => tmpRdData := status.countSyncE;
             when CNTINTVL   => tmpRdData := r.config.interval;
             when CNTBRT     => tmpRdData := status.countBRT;
-            when others     => axiReadResp := AXI_RESP_DECERR_C;
+            when others     => 
+               if rdPntr >= BSADEF and rdPntr <= BSADEF_END then
+                  iseq      := conv_integer(regAddr(8 downto 4));
+                  case regAddr(3 downto 2) is
+                    when "00" => tmpRdData( 1 downto  0) := r.bsadefRateMode (iseq);
+                                 tmpRdData( 5 downto  2) := r.bsaDefFixedRate(iseq);
+                                 tmpRdData( 8 downto  6) := r.bsaDefACRate   (iseq);
+                                 tmpRdData(14 downto  9) := r.bsaDefACTSMask (iseq); 
+                                 tmpRdData(19 downto 15) := r.bsaDefSeqSel   (iseq); 
+                                 tmpRdData(23 downto 20) := r.bsaDefSeqBit   (iseq); 
+                                 tmpRdData(25 downto 24) := r.bsaDefDestMode (iseq); 
+                    when "01" => tmpRdData(15 downto  0) := r.bsadefDestInclM(iseq); 
+                                 tmpRdData(31 downto 16) := r.bsaDefDestExclM(iseq); 
+                    when "10" => tmpRdData(12 downto  0) := r.bsadefNToAvg   (iseq); 
+                                 tmpRdData(15 downto 14) := r.bsaDefMaxSevr  (iseq); 
+                                 tmpRdData(31 downto 16) := r.bsaDefAvgToWr  (iseq); 
+                    when others => null;
+                  end case;
+               else
+                  axiReadResp := AXI_RESP_DECERR_C;
+               end if;
           end case;
           v.axiReadSlave.rdata := tmpRdData;
           -- Send AXI response
@@ -364,9 +406,10 @@ begin
       end if;
 
       for i in 0 to NARRAYS_BSA-1 loop
+        foo := r.bsadefRateMode(i);
         if (v.config.bsadefv(i).init ='1' and r.config.bsadefv(i).init='0') then
           v.config.bsadefv(i).rateSel(12 downto 11) := r.bsadefRateMode(i);
-          case r.bsadefRateMode(i) is
+          case foo is
             when "00"   => v.config.bsadefv(i).rateSel( 3 downto 0) := r.bsadefFixedRate(i);
             when "01"   => v.config.bsadefv(i).rateSel( 8 downto 3) := r.bsadefACTSMask (i);
                            v.config.bsadefv(i).rateSel( 2 downto 0) := r.bsadefACRate   (i);
@@ -374,7 +417,8 @@ begin
                            v.config.bsadefv(i).rateSel( 3 downto 0) := r.bsadefSeqBit   (i);
           end case;
           v.config.bsadefv(i).destSel(17 downto 16) := r.bsadefDestMode(i);
-          case r.bsadefDestMode(i) is
+          boo := r.bsadefDestMode(i);
+          case boo is
             when "00"   => v.config.bsadefv(i).destSel(15 downto 0) := r.bsadefDestInclM(i);
             when "01"   => v.config.bsadefv(i).destSel(15 downto 0) := r.bsadefDestExclM(i);
             when others => null;

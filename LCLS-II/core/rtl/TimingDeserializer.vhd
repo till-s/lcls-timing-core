@@ -20,13 +20,15 @@
 -- the terms contained in the LICENSE.txt file.
 -------------------------------------------------------------------------------
 library ieee;
-use work.all;
+--use work.all;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 use work.StdRtlPkg.all;
 use work.TimingPkg.all;
 use work.CrcPkg.all;
+use work.Ila_256Pkg.all;
 
 entity TimingDeserializer is
    generic (
@@ -43,7 +45,7 @@ entity TimingDeserializer is
       data      : in  TimingRxType;
       sof       : out sl;
       eof       : out sl;
-      crcErr    : out sl );
+      crcErr    : out sl; dTrigO : out DbgTrigType; dTrigI : in DbgTrigType );
 end TimingDeserializer;
 
 -- Define architecture for top level module
@@ -84,6 +86,8 @@ architecture TimingDeserializer of TimingDeserializer is
   signal r   : RegType := REG_INIT_C;
   signal rin : RegType;
   signal crc : slv(31 downto 0);
+
+  signal stateSlv : slv(2 downto 0);
   
 begin
 
@@ -93,7 +97,45 @@ begin
   sof      <= r.sof;
   eof      <= r.eof;
   crcErr   <= r.crcErr;
-  
+
+  stateSlv <= slv( to_unsigned( StateType'POS( r.state ), stateSlv'length ) );
+
+  U_Ila : component Ila_256
+    port map (
+      clk          => clk,
+      trig_out     => dTrigO.sig,
+      trig_out_ack => dTrigI.ack,
+      trig_in      => dTrigI.sig,
+      trig_in_ack  => dTrigO.ack,
+      probe0(15 downto  0) => data.data,
+      probe0(17 downto 16) => data.dataK,
+      probe0(18          ) => r.crcReset,
+      probe0(19          ) => r.crcValid,
+      probe0(20          ) => r.fiducial,
+      probe0(21          ) => r.advance(0),
+      probe0(22          ) => r.sof,
+      probe0(23          ) => r.eof,
+      probe0(24          ) => r.crcErr,
+      probe0(25          ) => r.crcReset,
+      probe0(26          ) => r.crcValid,
+      probe0(27          ) => r.served(0),
+      probe0(29 downto 28) => data.decErr,
+      probe0(31 downto 30) => data.dspErr,
+      probe0(63 downto 32) => r.crc,
+
+      probe1( 0          ) => rst,
+      probe1( 3 downto  1) => stateSlv,
+      probe1(15 downto  4) => (others => '0'),
+      probe1(17 downto 16) => (others => '0'),
+      probe1(18          ) => r.streams(0).ready,
+      probe1(19          ) => r.streams(0).last,
+      probe1(23 downto 20) => (others => '0'),
+      probe1(30 downto 24) => r.streams(0).offset,
+      probe1(31          ) => '0',
+      probe1(47 downto 32) => r.streams(0).data,
+      probe1(63 downto 48) => (others => '0')
+    );
+   
   U_CRC : entity work.Crc32Parallel
     generic map ( TPD_G=>TPD_G, BYTE_WIDTH_G => 2, CRC_INIT_G => x"FFFFFFFF" )
     port map ( crcOut       => crc,
