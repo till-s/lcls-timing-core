@@ -92,8 +92,8 @@ architecture TimingSerialDelay of TimingSerialDelay is
   signal firstW    : sl;
   signal wr_cnt    : sl;
 
-  signal dbg       : slv(3*MADDR_WIDTH_C - 1 downto 0);
-  signal dbgStat   : slv(7 downto 0);
+  signal dbg       : slv(3*MADDR_WIDTH_C - 1 downto 0) := (others => '0');
+  signal dbgStat   : slv(7 downto 0) := (others => '0');
 
   attribute use_dsp48      : string;
   attribute use_dsp48 of r : signal is "yes";  
@@ -140,7 +140,7 @@ begin
                 dout(15 downto 0) => dout_msg,
                 dout(16)          => firstW,
                 valid             => valid_msg,
-                overflow          => full_msg, dbg => dbg, dbgStat => dbgStat );
+                overflow          => full_msg );
 
   U_Ila : component work.Ila_256Pkg.Ila_256
     port map (
