@@ -26,7 +26,7 @@ use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 use work.StdRtlPkg.all;
 use work.TimingPkg.all;
-use work.Ila_256Pkg.all;
+use work.IlaWrappersPkg.all;
 
 entity TimingSerialDelay is
    generic ( TPD_G         : time    := 1 ns;

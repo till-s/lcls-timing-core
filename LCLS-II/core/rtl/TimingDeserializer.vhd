@@ -28,7 +28,7 @@ use ieee.numeric_std.all;
 use work.StdRtlPkg.all;
 use work.TimingPkg.all;
 use work.CrcPkg.all;
-use work.Ila_256Pkg.all;
+use work.IlaWrappersPkg.all;
 
 entity TimingDeserializer is
    generic (

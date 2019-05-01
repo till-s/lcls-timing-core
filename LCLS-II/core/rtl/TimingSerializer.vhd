@@ -25,7 +25,7 @@ use ieee.std_logic_1164.all;
 use work.StdRtlPkg.all;
 use work.TimingPkg.all;
 use work.CrcPkg.all;
-use work.Ila_256Pkg.all;
+use work.IlaWrappersPkg.all;
 
 library xil_defaultlib;
 

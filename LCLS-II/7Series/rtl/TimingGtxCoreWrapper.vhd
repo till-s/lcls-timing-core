@@ -21,6 +21,7 @@ use ieee.std_logic_arith.all;
 use work.StdRtlPkg.all;
 use work.AxiLitePkg.all;
 use work.TimingPkg.all;
+use work.IlaWrappersPkg.all;
 
 library unisim;
 use unisim.vcomponents.all;
@@ -185,16 +186,6 @@ architecture rtl of TimingGtCoreWrapper is
 
    signal probe0           : slv(63 downto 0) := (others => '0');
    signal probe1           : slv(63 downto 0) := (others => '0');
-
-component Ila_256 is
-    Port (
-      clk : in STD_LOGIC;
-      probe0 : in STD_LOGIC_VECTOR ( 63 downto 0 );
-      probe1 : in STD_LOGIC_VECTOR ( 63 downto 0 );
-      probe2 : in STD_LOGIC_VECTOR ( 63 downto 0 );
-      probe3 : in STD_LOGIC_VECTOR ( 63 downto 0 )
-    );
-end component Ila_256;
 
 begin
 
