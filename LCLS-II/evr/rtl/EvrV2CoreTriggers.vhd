@@ -36,6 +36,7 @@ entity EvrV2CoreTriggers is
     TRIG_PIPE_G      : natural          := 0;  -- no trigger pipeline by default
     COMMON_CLK_G     : boolean          := false;
     EVR_CARD_G       : boolean          := false; -- false = packs registers in tight 256B for small BAR0 applications, true = groups registers in 4kB boundary to "virtualize" the channels allowing separate processes to memory map the register space for their dedicated channels.
+    INVERT_POLARITY_G: slv              := "";    -- picks default of all '0's if given, must be slv(NTRIGGERS_G - 1 downto 0)
     AXIL_BASEADDR_G  : slv(31 downto 0) := x"00080000" );
   port (
     -- AXI-Lite and IRQ Interface
@@ -51,15 +52,15 @@ entity EvrV2CoreTriggers is
     evrBus              : in  TimingBusType;
     -- Trigger and Sync Port
     trigOut             : out TimingTrigType;
-    invertPolarity      : in  slv(NTRIGGERS_G - 1 downto 0) := (others => '0');
     evrModeSel          : in  sl := '1' );
 end EvrV2CoreTriggers;
 
 architecture mapping of EvrV2CoreTriggers is
 
   constant NUM_AXI_MASTERS_C : natural := 2;
-  constant CHAN_INDEX_C  : natural := 0;
-  constant TRIG_INDEX_C  : natural := 1;
+  constant CHAN_INDEX_C      : natural := 0;
+  constant TRIG_INDEX_C      : natural := 1;
+  constant INVERT_POLARITY_C : slv(NTRIGGERS_G - 1 downto 0) := ite(INVERT_POLARITY_G'length = 0, slv(to_unsigned(0, NTRIGGERS_G)), INVERT_POLARITY_G);
 
   constant AXI_CROSSBAR_MASTERS_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXI_MASTERS_C-1 downto 0) := (
     CHAN_INDEX_C      => (
@@ -158,13 +159,13 @@ begin  -- rtl
                      CHANNELS_C   => NCHANNELS_G,
                      TRIG_DEPTH_C => TRIG_PIPE_G,
                      TRIG_WIDTH_C => TRIG_DEPTH_G,
+                     INV_POL_G    => INVERT_POLARITY_C(i),
                      USE_MASK_G   => false )
        port map (    clk      => evrClk,
                      rst      => evrRst,
                      config   => triggerConfigS(i),
                      arm      => eventSel,
                      fire     => strobe(3),
-                     invertpol=> invertPolarity(i),
                      trigstate=> trigOut.trigPulse(i) );
    end generate;  -- i
 

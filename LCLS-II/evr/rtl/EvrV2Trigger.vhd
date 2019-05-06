@@ -40,7 +40,8 @@ entity EvrV2Trigger is
             CHANNELS_C   : integer := 1;
             TRIG_DEPTH_C : integer := 16;
             TRIG_WIDTH_C : integer := EVRV2_TRIG_WIDTH_C; -- bit size of
-                                                        -- width,delay counters
+                                                          -- width,delay counters
+            INV_POL_G    : sl      := '0';                -- invert polarity (useful if P/N of differential output are swapped for routing reasons)
             USE_MASK_G   : boolean := false;
             DEBUG_C      : boolean := false);
   port (
@@ -49,7 +50,6 @@ entity EvrV2Trigger is
       config     : in  EvrV2TriggerConfigType;
       arm        : in  slv(CHANNELS_C-1 downto 0);
       fire       : in  sl;
-      invertpol  : in  sl := '0'; -- invert polarity (useful if differential output with p/n reversed for routing)
       trigstate  : out sl );
 end EvrV2Trigger;
 
@@ -126,7 +126,7 @@ begin
    begin 
       v := r;
 
-      v.state     := not (config.polarity xor invertpol);
+      v.state     := not (config.polarity xor INV_POL_G);
       v.fifoReset := '0';
       v.fifoRd    := '0';
 
@@ -140,7 +140,7 @@ begin
           end if;
         else
           v.width  := r.width-1;
-          v.state  := (config.polarity xor invertpol);
+          v.state  := (config.polarity xor INV_POL_G);
         end if;
       else
         v.delay  := r.delay-1;
