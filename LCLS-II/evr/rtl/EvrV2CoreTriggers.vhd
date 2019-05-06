@@ -51,6 +51,7 @@ entity EvrV2CoreTriggers is
     evrBus              : in  TimingBusType;
     -- Trigger and Sync Port
     trigOut             : out TimingTrigType;
+    invertPolarity      : in  slv(NTRIGGERS_G - 1 downto 0) := (others => '0');
     evrModeSel          : in  sl := '1' );
 end EvrV2CoreTriggers;
 
@@ -163,6 +164,7 @@ begin  -- rtl
                      config   => triggerConfigS(i),
                      arm      => eventSel,
                      fire     => strobe(3),
+                     invertpol=> invertPolarity(i),
                      trigstate=> trigOut.trigPulse(i) );
    end generate;  -- i
 

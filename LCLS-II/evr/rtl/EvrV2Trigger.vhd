@@ -49,6 +49,7 @@ entity EvrV2Trigger is
       config     : in  EvrV2TriggerConfigType;
       arm        : in  slv(CHANNELS_C-1 downto 0);
       fire       : in  sl;
+      invertpol  : in  sl := '0'; -- invert polarity (useful if differential output with p/n reversed for routing)
       trigstate  : out sl );
 end EvrV2Trigger;
 
@@ -125,7 +126,7 @@ begin
    begin 
       v := r;
 
-      v.state     := not config.polarity;
+      v.state     := not (config.polarity xor invertpol);
       v.fifoReset := '0';
       v.fifoRd    := '0';
 
@@ -139,7 +140,7 @@ begin
           end if;
         else
           v.width  := r.width-1;
-          v.state  := config.polarity;
+          v.state  := (config.polarity xor invertpol);
         end if;
       else
         v.delay  := r.delay-1;
