@@ -164,7 +164,8 @@ begin
       end if;
 
       if rst='1' or config.enabled='0' then
-         v := REG_INIT_C;
+         v       := REG_INIT_C;
+         v.state := not (config.polarity xor INV_POL_G);
       end if;
       
       rin <= v;
