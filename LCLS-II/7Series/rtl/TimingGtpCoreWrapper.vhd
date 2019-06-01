@@ -50,6 +50,10 @@ entity TimingGtCoreWrapper is
       gtTxP     : out sl;
       gtTxN     : out sl;
 
+      -- Clock PLL selection: bit 1: rx/txoutclk, bit 0: rx/tx data path
+      gtRxPllSel : in slv(1 downto 0) := "00";
+      gtTxPllSel : in slv(1 downto 0) := "00";
+
       -- Rx ports
       rxControl      : in  TimingPhyControlType;
       rxStatus       : out TimingPhyStatusType;
@@ -94,6 +98,8 @@ gt0_drpdo_out : out STD_LOGIC_VECTOR ( 15 downto 0 );
 gt0_drpen_in : in STD_LOGIC;
 gt0_drprdy_out : out STD_LOGIC;
 gt0_drpwe_in : in STD_LOGIC;
+gt0_rxsysclksel_in : in STD_LOGIC_VECTOR ( 1 downto 0 );
+gt0_txsysclksel_in : in STD_LOGIC_VECTOR ( 1 downto 0 );
 gt0_loopback_in : in STD_LOGIC_VECTOR ( 2 downto 0 );
 gt0_eyescanreset_in : in STD_LOGIC;
 gt0_rxuserrdy_in : in STD_LOGIC;
@@ -303,6 +309,9 @@ begin
          gt0_drpen_in                    =>      drpEn,
          gt0_drprdy_out                  =>      drpRdy,
          gt0_drpwe_in                    =>      drpWe,
+	 --------------------------- Selection of reference PLL ---------------------
+	 gt0_rxsysclksel_in              =>      gtRxPllSel,
+         gt0_txsysclksel_in              =>      gtTxPllSel,
          --------------------------- Digital Monitor Ports --------------------------
          gt0_dmonitorout_out             =>      open,
          ------------------------------- Loopback Ports -----------------------------
