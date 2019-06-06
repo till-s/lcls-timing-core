@@ -33,119 +33,119 @@ entity TimingGtCoreWrapper is
       AXIL_BASE_ADDR_G : slv(31 downto 0));
    port (
       -- AXI-Lite Port
-      axilClk         : in  sl;
-      axilRst         : in  sl;
-      axilReadMaster  : in  AxiLiteReadMasterType;
-      axilReadSlave   : out AxiLiteReadSlaveType;
-      axilWriteMaster : in  AxiLiteWriteMasterType;
-      axilWriteSlave  : out AxiLiteWriteSlaveType;
+      axilClk          : in  sl;
+      axilRst          : in  sl;
+      axilReadMaster   : in  AxiLiteReadMasterType;
+      axilReadSlave    : out AxiLiteReadSlaveType;
+      axilWriteMaster  : in  AxiLiteWriteMasterType;
+      axilWriteSlave   : out AxiLiteWriteSlaveType;
 
-      stableClk : in  sl;
+      stableClk        : in  sl;
 
       -- GTP FPGA IO
-      gtRefClk  : in  sl;
-      gtRefClkDiv2  : in  sl := '0';-- Unused in GTHE3, but used in GTHE4
-      gtRxP     : in  sl;
-      gtRxN     : in  sl;
-      gtTxP     : out sl;
-      gtTxN     : out sl;
+      gtRefClk         : in  sl;
+      gtRefClkDiv2     : in  sl := '0';-- Unused in GTHE3, but used in GTHE4
+      gtRxP            : in  sl;
+      gtRxN            : in  sl;
+      gtTxP            : out sl;
+      gtTxN            : out sl;
 
       -- Clock PLL selection: bit 1: rx/txoutclk, bit 0: rx/tx data path
-      gtRxPllSel : in slv(1 downto 0) := "00";
-      gtTxPllSel : in slv(1 downto 0) := "00";
+      gtRxPllSel       : in slv(1 downto 0) := "00";
+      gtTxPllSel       : in slv(1 downto 0) := "00";
 
       -- Rx ports
-      rxControl      : in  TimingPhyControlType;
-      rxStatus       : out TimingPhyStatusType;
-      rxUsrClkActive : in  sl := '1';
-      rxCdrStable    : out sl;
-      rxUsrClk       : in  sl;
-      rxData         : out slv(15 downto 0);
-      rxDataK        : out slv(1 downto 0);
-      rxDispErr      : out slv(1 downto 0);
-      rxDecErr       : out slv(1 downto 0);
-      rxOutClk       : out sl;
+      rxControl        : in  TimingPhyControlType;
+      rxStatus         : out TimingPhyStatusType;
+      rxUsrClkActive   : in  sl := '1';
+      rxCdrStable      : out sl;
+      rxUsrClk         : in  sl;
+      rxData           : out slv(15 downto 0);
+      rxDataK          : out slv(1 downto 0);
+      rxDispErr        : out slv(1 downto 0);
+      rxDecErr         : out slv(1 downto 0);
+      rxOutClk         : out sl;
 
       -- Tx Ports
-      txControl      : in  TimingPhyControlType;
-      txStatus       : out TimingPhyStatusType;
-      txUsrClk       : in  sl;
-      txUsrClkActive : in  sl := '1';
-      txData         : in  slv(15 downto 0);
-      txDataK        : in  slv(1 downto 0);
-      txOutClk       : out sl;
+      txControl        : in  TimingPhyControlType;
+      txStatus         : out TimingPhyStatusType;
+      txUsrClk         : in  sl;
+      txUsrClkActive   : in  sl := '1';
+      txData           : in  slv(15 downto 0);
+      txDataK          : in  slv(1 downto 0);
+      txOutClk         : out sl;
 
       -- Loopback
-      loopback       : in slv(2 downto 0));
+      loopback         : in slv(2 downto 0));
 end entity TimingGtCoreWrapper;
 
 architecture rtl of TimingGtCoreWrapper is
 
-component TimingGtp
-port (
-    SYSCLK_IN : in STD_LOGIC;
-SOFT_RESET_TX_IN : in STD_LOGIC;
-SOFT_RESET_RX_IN : in STD_LOGIC;
-DONT_RESET_ON_DATA_ERROR_IN : in STD_LOGIC;
-GT0_DRP_BUSY_OUT : out STD_LOGIC;
-GT0_TX_FSM_RESET_DONE_OUT : out STD_LOGIC;
-GT0_RX_FSM_RESET_DONE_OUT : out STD_LOGIC;
-GT0_DATA_VALID_IN : in STD_LOGIC;
-gt0_drpaddr_in : in STD_LOGIC_VECTOR ( 8 downto 0 );
-gt0_drpclk_in : in STD_LOGIC;
-gt0_drpdi_in : in STD_LOGIC_VECTOR ( 15 downto 0 );
-gt0_drpdo_out : out STD_LOGIC_VECTOR ( 15 downto 0 );
-gt0_drpen_in : in STD_LOGIC;
-gt0_drprdy_out : out STD_LOGIC;
-gt0_drpwe_in : in STD_LOGIC;
-gt0_rxsysclksel_in : in STD_LOGIC_VECTOR ( 1 downto 0 );
-gt0_txsysclksel_in : in STD_LOGIC_VECTOR ( 1 downto 0 );
-gt0_loopback_in : in STD_LOGIC_VECTOR ( 2 downto 0 );
-gt0_eyescanreset_in : in STD_LOGIC;
-gt0_rxuserrdy_in : in STD_LOGIC;
-gt0_eyescandataerror_out : out STD_LOGIC;
-gt0_eyescantrigger_in : in STD_LOGIC;
-gt0_rxdata_out : out STD_LOGIC_VECTOR ( 15 downto 0 );
-gt0_rxusrclk_in : in STD_LOGIC;
-gt0_rxusrclk2_in : in STD_LOGIC;
-gt0_rxcharisk_out : out STD_LOGIC_VECTOR ( 1 downto 0 );
-gt0_rxdisperr_out : out STD_LOGIC_VECTOR ( 1 downto 0 );
-gt0_rxnotintable_out : out STD_LOGIC_VECTOR ( 1 downto 0 );
-gt0_gtprxn_in : in STD_LOGIC;
-gt0_gtprxp_in : in STD_LOGIC;
-gt0_rxphmonitor_out : out STD_LOGIC_VECTOR ( 4 downto 0 );
-gt0_rxphslipmonitor_out : out STD_LOGIC_VECTOR ( 4 downto 0 );
-gt0_dmonitorout_out : out STD_LOGIC_VECTOR ( 14 downto 0 );
-gt0_rxlpmhfhold_in : in STD_LOGIC;
-gt0_rxlpmlfhold_in : in STD_LOGIC;
-gt0_rxoutclk_out : out STD_LOGIC;
-gt0_rxoutclkfabric_out : out STD_LOGIC;
-gt0_gtrxreset_in : in STD_LOGIC;
-gt0_rxlpmreset_in : in STD_LOGIC;
-gt0_rxpolarity_in : in STD_LOGIC;
-gt0_rxresetdone_out : out STD_LOGIC;
-gt0_gttxreset_in : in STD_LOGIC;
-gt0_txuserrdy_in : in STD_LOGIC;
-gt0_txdata_in : in STD_LOGIC_VECTOR ( 15 downto 0 );
-gt0_txusrclk_in : in STD_LOGIC;
-gt0_txusrclk2_in : in STD_LOGIC;
-gt0_txcharisk_in : in STD_LOGIC_VECTOR ( 1 downto 0 );
-gt0_gtptxn_out : out STD_LOGIC;
-gt0_gtptxp_out : out STD_LOGIC;
-gt0_txoutclk_out : out STD_LOGIC;
-gt0_txoutclkfabric_out : out STD_LOGIC;
-gt0_txoutclkpcs_out : out STD_LOGIC;
-gt0_txresetdone_out : out STD_LOGIC;
-gt0_txpolarity_in : in STD_LOGIC;
-GT0_PLL0OUTCLK_IN : in STD_LOGIC;
-GT0_PLL0OUTREFCLK_IN : in STD_LOGIC;
-GT0_PLL0RESET_OUT : out STD_LOGIC;
-GT0_PLL0LOCK_IN : in STD_LOGIC;
-GT0_PLL0REFCLKLOST_IN : in STD_LOGIC;
-GT0_PLL1OUTCLK_IN : in STD_LOGIC;
-GT0_PLL1OUTREFCLK_IN : in STD_LOGIC
-);
-end component TimingGtp;
+   component TimingGtp
+      port (
+         SYSCLK_IN : in STD_LOGIC;
+         SOFT_RESET_TX_IN : in STD_LOGIC;
+         SOFT_RESET_RX_IN : in STD_LOGIC;
+         DONT_RESET_ON_DATA_ERROR_IN : in STD_LOGIC;
+         GT0_DRP_BUSY_OUT : out STD_LOGIC;
+         GT0_TX_FSM_RESET_DONE_OUT : out STD_LOGIC;
+         GT0_RX_FSM_RESET_DONE_OUT : out STD_LOGIC;
+         GT0_DATA_VALID_IN : in STD_LOGIC;
+         gt0_drpaddr_in : in STD_LOGIC_VECTOR ( 8 downto 0 );
+         gt0_drpclk_in : in STD_LOGIC;
+         gt0_drpdi_in : in STD_LOGIC_VECTOR ( 15 downto 0 );
+         gt0_drpdo_out : out STD_LOGIC_VECTOR ( 15 downto 0 );
+         gt0_drpen_in : in STD_LOGIC;
+         gt0_drprdy_out : out STD_LOGIC;
+         gt0_drpwe_in : in STD_LOGIC;
+         gt0_rxsysclksel_in : in STD_LOGIC_VECTOR ( 1 downto 0 );
+         gt0_txsysclksel_in : in STD_LOGIC_VECTOR ( 1 downto 0 );
+         gt0_loopback_in : in STD_LOGIC_VECTOR ( 2 downto 0 );
+         gt0_eyescanreset_in : in STD_LOGIC;
+         gt0_rxuserrdy_in : in STD_LOGIC;
+         gt0_eyescandataerror_out : out STD_LOGIC;
+         gt0_eyescantrigger_in : in STD_LOGIC;
+         gt0_rxdata_out : out STD_LOGIC_VECTOR ( 15 downto 0 );
+         gt0_rxusrclk_in : in STD_LOGIC;
+         gt0_rxusrclk2_in : in STD_LOGIC;
+         gt0_rxcharisk_out : out STD_LOGIC_VECTOR ( 1 downto 0 );
+         gt0_rxdisperr_out : out STD_LOGIC_VECTOR ( 1 downto 0 );
+         gt0_rxnotintable_out : out STD_LOGIC_VECTOR ( 1 downto 0 );
+         gt0_gtprxn_in : in STD_LOGIC;
+         gt0_gtprxp_in : in STD_LOGIC;
+         gt0_rxphmonitor_out : out STD_LOGIC_VECTOR ( 4 downto 0 );
+         gt0_rxphslipmonitor_out : out STD_LOGIC_VECTOR ( 4 downto 0 );
+         gt0_dmonitorout_out : out STD_LOGIC_VECTOR ( 14 downto 0 );
+         gt0_rxlpmhfhold_in : in STD_LOGIC;
+         gt0_rxlpmlfhold_in : in STD_LOGIC;
+         gt0_rxoutclk_out : out STD_LOGIC;
+         gt0_rxoutclkfabric_out : out STD_LOGIC;
+         gt0_gtrxreset_in : in STD_LOGIC;
+         gt0_rxlpmreset_in : in STD_LOGIC;
+         gt0_rxpolarity_in : in STD_LOGIC;
+         gt0_rxresetdone_out : out STD_LOGIC;
+         gt0_gttxreset_in : in STD_LOGIC;
+         gt0_txuserrdy_in : in STD_LOGIC;
+         gt0_txdata_in : in STD_LOGIC_VECTOR ( 15 downto 0 );
+         gt0_txusrclk_in : in STD_LOGIC;
+         gt0_txusrclk2_in : in STD_LOGIC;
+         gt0_txcharisk_in : in STD_LOGIC_VECTOR ( 1 downto 0 );
+         gt0_gtptxn_out : out STD_LOGIC;
+         gt0_gtptxp_out : out STD_LOGIC;
+         gt0_txoutclk_out : out STD_LOGIC;
+         gt0_txoutclkfabric_out : out STD_LOGIC;
+         gt0_txoutclkpcs_out : out STD_LOGIC;
+         gt0_txresetdone_out : out STD_LOGIC;
+         gt0_txpolarity_in : in STD_LOGIC;
+         GT0_PLL0OUTCLK_IN : in STD_LOGIC;
+         GT0_PLL0OUTREFCLK_IN : in STD_LOGIC;
+         GT0_PLL0RESET_OUT : out STD_LOGIC;
+         GT0_PLL0LOCK_IN : in STD_LOGIC;
+         GT0_PLL0REFCLKLOST_IN : in STD_LOGIC;
+         GT0_PLL1OUTCLK_IN : in STD_LOGIC;
+         GT0_PLL1OUTREFCLK_IN : in STD_LOGIC
+      );
+   end component TimingGtp;
 
    constant AXI_CROSSBAR_MASTERS_CONFIG_C : AxiLiteCrossbarMasterConfigArray(1 downto 0) := (
       0               => (
