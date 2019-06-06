@@ -309,8 +309,8 @@ begin
          gt0_drpen_in                    =>      drpEn,
          gt0_drprdy_out                  =>      drpRdy,
          gt0_drpwe_in                    =>      drpWe,
-	 --------------------------- Selection of reference PLL ---------------------
-	 gt0_rxsysclksel_in              =>      gtRxPllSel,
+         --------------------------- Selection of reference PLL ---------------------
+         gt0_rxsysclksel_in              =>      gtRxPllSel,
          gt0_txsysclksel_in              =>      gtTxPllSel,
          --------------------------- Digital Monitor Ports --------------------------
          gt0_dmonitorout_out             =>      open,
@@ -338,7 +338,6 @@ begin
          gt0_rxphmonitor_out             =>      open,
          gt0_rxphslipmonitor_out         =>      open,
          --------------------- Receive Ports - RX Equalizer Ports -------------------
--- FIXME--
          gt0_rxlpmhfhold_in               =>      '0',
          gt0_rxlpmlfhold_in               =>      '0',
 
