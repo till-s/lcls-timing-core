@@ -399,7 +399,6 @@ begin
    txOutClk <= txoutclkb;
    rxOutClk <= rxoutclkb;
 
--- NOTE: CHeck; this is not correct (reset structure)
   cpll_railing_pll0_q0_clk1_refclk_i : entity work.TimingGtp_cpll_railing
   generic map(
            USE_BUFG       => 0
@@ -412,9 +411,7 @@ begin
         refclk_in => gtRefClk
    );
 
-   pll0_reset_i <= pll_rail_reset_i or pll_reset_i;
-
-
+   pll0_reset_i <= pll_rail_reset_i or pll_reset_i or txControl.reset;
    
    TIMING_COMMON_TMP : entity work.TimingGtp_common
       port map (
