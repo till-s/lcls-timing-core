@@ -28,6 +28,7 @@ use unisim.vcomponents.all;
 entity TimingGtCoreWrapper is
    generic (
       TPD_G            : time    := 1 ns;
+      WITH_COMMON_G    : boolean := true;
       AXIL_CLK_FREQ_G  : real    := 156.25E6;
       AXIL_BASE_ADDR_G : slv(31 downto 0));
    port (
@@ -42,8 +43,6 @@ entity TimingGtCoreWrapper is
       stableClk        : in  sl;
 
       -- GTP FPGA IO
-      gtRefClk         : in  sl;
-      gtRefClkDiv2     : in  sl := '0';-- Unused in GTHE3, but used in GTHE4
       gtRxP            : in  sl;
       gtRxN            : in  sl;
       gtTxP            : out sl;
@@ -52,6 +51,19 @@ entity TimingGtCoreWrapper is
       -- Clock PLL selection: bit 1: rx/txoutclk, bit 0: rx/tx data path
       gtRxPllSel       : in slv(1 downto 0) := "00";
       gtTxPllSel       : in slv(1 downto 0) := "00";
+
+      -- signals for external common block (WITH_COMMON_G = false)
+      pllOutClk        : in  slv(1 downto 0) := "00";
+      pllOutRefClk     : in  slv(1 downto 0) := "00";
+
+      pllLocked        : in  sl := '0';
+      pllRefClkLost    : in  sl := '0';
+
+      pllRst           : out sl;
+
+      -- ref clock for internal common block (WITH_COMMON_G = true)
+      gtRefClk         : in  sl := '0';
+      gtRefClkDiv2     : in  sl := '0';-- Unused in GTHE3, but used in GTHE4
 
       -- Rx ports
       rxControl        : in  TimingPhyControlType;
@@ -185,16 +197,15 @@ architecture rtl of TimingGtCoreWrapper is
    signal mAxilReadMaster  : AxiLiteReadMasterType;
    signal mAxilReadSlave   : AxiLiteReadSlaveType;
 
-   signal pll0outclk_i     : sl;
-   signal pll0outrefclk_i  : sl;
-   signal pll1outclk_i     : sl;
-   signal pll1outrefclk_i  : sl;
+   signal plloutclk_i      : slv(1 downto 0);
+   signal plloutrefclk_i   : slv(1 downto 0);
 
    signal pll0_reset_i     : sl;
    signal pll0_pd_i        : sl;
 
    signal pll_rail_reset_i : sl;
    signal pll_reset_i      : sl;
+   signal pllRst_i         : sl;
    signal pll_locked_i     : sl;
    signal pll_refclklost_i : sl;
 
@@ -373,10 +384,10 @@ begin
          gt0_rxpolarity_in               =>      rxControl.polarity,
          gt0_txpolarity_in               =>      txControl.polarity,
  
-         gt0_pll0outclk_in               =>      pll0outclk_i,
-         gt0_pll0outrefclk_in            =>      pll0outrefclk_i,
-         gt0_pll1outclk_in               =>      pll1outclk_i,
-         gt0_pll1outrefclk_in            =>      pll1outrefclk_i,
+         gt0_pll0outclk_in               =>      plloutclk_i   (0),
+         gt0_pll0outrefclk_in            =>      plloutrefclk_i(0),
+         gt0_pll1outclk_in               =>      plloutclk_i   (1),
+         gt0_pll1outrefclk_in            =>      plloutrefclk_i(1),
 
          GT0_PLL0RESET_OUT               =>      pll_reset_i,
          GT0_PLL0LOCK_IN                 =>      pll_locked_i,
@@ -397,19 +408,22 @@ begin
    txOutClk <= txoutclkb;
    rxOutClk <= rxoutclkb;
 
-  cpll_railing_pll0_q0_clk1_refclk_i : entity work.TimingGtp_cpll_railing
-  generic map(
-           USE_BUFG       => 0
-   )
-   port map
-   (
-        cpll_reset_out => pll_rail_reset_i,
-        cpll_pd_out => pll0_pd_i,
-        refclk_out => open,
-        refclk_in => gtRefClk
-   );
+   pllRst_i <= pll_reset_i or txControl.reset;
 
-   pll0_reset_i <= pll_rail_reset_i or pll_reset_i or txControl.reset;
+   GEN_COMMON_BLK : if ( WITH_COMMON_G ) generate
+
+   cpll_railing_pll0_q0_clk1_refclk_i : entity work.TimingGtp_cpll_railing
+      generic map (
+         USE_BUFG       => 0
+      )
+      port map (
+         cpll_reset_out => pll_rail_reset_i,
+         cpll_pd_out    => pll0_pd_i,
+         refclk_out     => open,
+         refclk_in      => gtRefClk
+      );
+
+   pll0_reset_i <= pll_rail_reset_i or pllRst_i;
    
    TIMING_COMMON_TMP : entity work.TimingGtp_common
       port map (
@@ -420,18 +434,30 @@ begin
          DRPEN_COMMON_IN      => '0',
          DRPRDY_COMMON_OUT    => open,
          DRPWE_COMMON_IN      => '0',
-         PLL0OUTCLK_OUT       => pll0outclk_i,
-         PLL0OUTREFCLK_OUT    => pll0outrefclk_i,
+         PLL0OUTCLK_OUT       => plloutclk_i   (0),
+         PLL0OUTREFCLK_OUT    => plloutrefclk_i(0),
          PLL0LOCK_OUT         => pll_locked_i,
          PLL0LOCKDETCLK_IN    => axilClk,
          PLL0REFCLKLOST_OUT   => pll_refclklost_i,
          PLL0RESET_IN         => pll0_reset_i,
          PLL0REFCLKSEL_IN     => "010",
          PLL0PD_IN            => pll0_pd_i,
-         PLL1OUTCLK_OUT       => pll1outclk_i,
-         PLL1OUTREFCLK_OUT    => pll1outrefclk_i,
+         PLL1OUTCLK_OUT       => plloutclk_i   (1),
+         PLL1OUTREFCLK_OUT    => plloutrefclk_i(1),
          GTREFCLK1_IN         => gtRefClk,
          GTREFCLK0_IN         => '0'
       );
+
+   end generate;
+
+   GEN_NO_COMMON_BLK : if ( not WITH_COMMON_G ) generate
+      plloutclk_i      <= pllOutClk;
+      plloutrefclk_i   <= pllOutRefClk;
+
+      pll_locked_i     <= pllLocked;
+      pll_refclklost_i <= pllRefClkLost;
+   end generate;
+
+   pllRst <= pllRst_i;
 
 end architecture rtl;
