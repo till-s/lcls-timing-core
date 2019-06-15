@@ -242,7 +242,7 @@ begin
    U_AlignCheck : entity work.GthRxAlignCheck
       generic map (
          TPD_G            => TPD_G,
-         GT_TYPE_G        => "GTX2",
+         GT_TYPE_G        => "GTP",
          REF_CLK_FREQ_G   => AXIL_CLK_FREQ_G,
          DRP_ADDR_G       => AXI_CROSSBAR_MASTERS_CONFIG_C(1).baseAddr)
       port map (
