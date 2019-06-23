@@ -209,6 +209,8 @@ architecture rtl of TimingGtCoreWrapper is
    signal pll_locked_i     : sl;
    signal pll_refclklost_i : sl;
 
+   constant USE_SURF_C : boolean := false;
+
 begin
 
    rxStatus.resetDone    <= bypassdone;
@@ -424,6 +426,49 @@ begin
       );
 
    pll0_reset_i <= pll_rail_reset_i or pllRst_i;
+
+   GEN_TMP : if ( USE_SURF_C ) generate
+      signal refClkFixed       : slv( 1 downto 0 ) := "00";
+      signal qPllLockLoc       : slv( 1 downto 0 );
+      signal qPllRefClkLostLoc : slv( 1 downto 0 );
+      signal qPllResetLoc      : slv( 1 downto 0 ) := "00";
+   begin
+
+   U_Gtp7QuadPll : entity work.Gtp7QuadPll
+      generic map (
+         TPD_G                => TPD_G,
+
+         PLL0_REFCLK_SEL_G    => "010",
+         PLL0_FBDIV_IN_G      => 4,
+         PLL0_FBDIV_45_IN_G   => 5,
+         PLL0_REFCLK_DIV_IN_G => 1,
+
+         PLL1_REFCLK_SEL_G    => "010",
+         PLL1_FBDIV_IN_G      => 1,
+         PLL1_FBDIV_45_IN_G   => 4,
+         PLL1_REFCLK_DIV_IN_G => 1)
+      port map (
+--         axilClk           => drpClk,
+         qPllRefClk        => refClkFixed,
+         qPllOutClk        => plloutclk_i,
+         qPllOutRefClk     => plloutrefclk_i,
+         qPllLock          => qPllLockLoc,
+         qPllLockDetClk(0) => axilClk,
+         qPllLockDetClk(1) => '0',
+         qPllRefClkLost    => qPllRefClkLostLoc,
+         qPllPowerDown(0)  => pll0_pd_i,
+         qPllPowerDown(1)  => '1',
+         qPllReset         => qpllResetLoc);
+
+      refClkFixed(0)   <= gtRefClk;
+      pll_locked_i     <= qPllLockLoc(0);
+      pll_refclklost_i <= qPllRefClkLostLoc(0);
+      qPllResetLoc(0)  <= pll0_reset_i;
+
+   end generate;
+
+
+   GEN_COM : if ( not USE_SURF_C ) generate
    
    TIMING_COMMON_TMP : entity work.TimingGtp_common
       port map (
@@ -447,6 +492,7 @@ begin
          GTREFCLK1_IN         => gtRefClk,
          GTREFCLK0_IN         => '0'
       );
+   end generate;
 
    end generate;
 
