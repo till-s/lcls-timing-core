@@ -56,19 +56,32 @@ architecture rtl of ClockTime is
   constant one_sec   : slv(31 downto 0) := slv(conv_unsigned(1000000000,32));
   signal step32         : slv (31 downto 0);
   signal valid          : sl;
-  signal dataSL, dataNL, dataNU : slv(31 downto 0);
+  signal dataSLa, dataSLb, dataNL, dataNU : slv(31 downto 0);
   signal wrDataB        : slv(wrData'range);
   signal dataB          : slv(wrData'range) := (others=>'0');
   signal remB           : slv( FRACTION_DEPTH_G downto 0) := (others=>'0');
   signal remN           : slv( FRACTION_DEPTH_G downto 0);
   signal urem           : slv( FRACTION_DEPTH_G downto 0);
   signal udiv           : slv( FRACTION_DEPTH_G downto 0);
+
+  component SynchronizerFifo is
+	  generic( TPD_G : time; DATA_WIDTH_G : natural );
+	  port(
+	  rst : in sl;
+	  wr_clk : in sl;
+	  wr_en : in sl;
+	  din  : in slv(DATA_WIDTH_G - 1 downto 0);
+	  rd_clk : in sl;
+	  rd_en : in sl;
+	  valid : out sl;
+	  dout  : out slv(DATA_WIDTH_G - 1 downto 0) );
+  end component SynchronizerFifo;
 begin
   step32 <= x"000000" & "000" & step;
   urem   <= '0' & remainder;
   udiv   <= '0' & divisor;
   
-  U_WrFifo : entity work.SynchronizerFifo
+  U_WrFifo : SynchronizerFifo
     generic map ( TPD_G=>TPD_G, DATA_WIDTH_G => 64 )
     port map ( rst    => rst,
                wr_clk => clkA,
@@ -79,7 +92,7 @@ begin
                valid  => valid,
                dout   => wrDataB );
 
-  U_RdFifo : entity work.SynchronizerFifo
+    U_RdFifo : SynchronizerFifo
     generic map ( TPD_G=>TPD_G, DATA_WIDTH_G => 64 )
     port map ( rst    => rst,
                wr_clk => clkB,
@@ -90,15 +103,20 @@ begin
                valid  => open,
                dout   => rdData );
 
-  dataSL <= (wrDataB(31 downto 0))      when (valid='1' and wrEnB='1')  else
-            (dataB(31 downto 0)+step32) when (remB+urem < udiv) else
-            (dataB(31 downto 0)+step32+1);
+  dataSLa <= (wrDataB(31 downto 0))      when (valid='1' and wrEnB='1')  else
+             (dataB(31 downto 0)+step32) when (remB+urem < udiv) else
+             (dataB(31 downto 0)+step32+1);
 
-  dataNL <= (dataSL) when (dataSL<one_sec) else
-            (dataSL-one_sec);
+  dataSLb <= (wrDataB(31 downto 0))              when (valid='1' and wrEnB='1')  else
+             (dataB(31 downto 0)+step32-one_sec) when (remB+urem < udiv) else
+             (dataB(31 downto 0)+step32-one_sec+1);
 
-  dataNU <= (wrDataB(63 downto 32))      when (valid='1' and wrEnB='1')  else
-            (dataB(63 downto 32))        when (dataSL<one_sec) else
+  -- check if dataSLb < 0
+  dataNL <= (dataSLa) when (dataSLb(dataSlb'left) = '1') else dataSLb;
+
+  dataNU <= (wrDataB(63 downto 32))      when (valid='1' and wrEnB='1')      else
+  -- check if dataSLb < 0
+            (dataB(63 downto 32))        when (dataSLb(dataSLb'left) = '1' ) else
             (dataB(63 downto 32)+1);
 
   remN  <= (others=>'0')    when (valid='1' and wrEnB='1') else
