@@ -78,6 +78,8 @@ architecture TimingSerializer of TimingSerializer is
   signal crc : slv(31 downto 0);
   signal dataLoc : slv(15 downto 0);
   signal dataKLoc : slv(1 downto 0);
+
+  constant GEN_ILA_C : boolean := false;
   
 begin
 
@@ -100,6 +102,7 @@ begin
                crcIn        => rin.data,
                crcReset     => r.crcReset );
 
+  GEN_ILA_G : if ( GEN_ILA_C ) generate
   U_Ila : component work.Ila_256Pkg.Ila_256
     port map (
       clk          => clk,
@@ -128,6 +131,7 @@ begin
       probe2       => (others => '0'),
       probe3       => (others => '0')
     );
+  end generate;
   
   comb: process (rst, fiducial, streams, streamIds, r)
     variable v    : RegType;

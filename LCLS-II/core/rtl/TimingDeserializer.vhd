@@ -51,6 +51,8 @@ end TimingDeserializer;
 -- Define architecture for top level module
 architecture TimingDeserializer of TimingDeserializer is
 
+   constant GEN_ILA_C : boolean := false;
+
    type StateType is (IDLE_S, SOS_S, SEGMENT_S, SINK_S, CRC1_S, CRC2_S, EOF_S);
    
    type RegType is
@@ -100,6 +102,7 @@ begin
 
   stateSlv <= slv( to_unsigned( StateType'POS( r.state ), stateSlv'length ) );
 
+  GEN_ILA_G : if ( GEN_ILA_C ) generate
   U_Ila : component Ila_256
     port map (
       clk          => clk,
@@ -135,6 +138,7 @@ begin
       probe1(47 downto 32) => r.streams(0).data,
       probe1(63 downto 48) => (others => '0')
     );
+  end generate;
    
   U_CRC : entity work.Crc32Parallel
     generic map ( TPD_G=>TPD_G, BYTE_WIDTH_G => 2, CRC_INIT_G => x"FFFFFFFF" )

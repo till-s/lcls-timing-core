@@ -51,6 +51,7 @@ architecture TimingSerialDelay of TimingSerialDelay is
 
   constant CADDR_WIDTH_C : integer := log2(FDEPTH_G);
   constant MADDR_WIDTH_C : integer := log2(NWORDS_G*FDEPTH_G);
+  constant GEN_ILA_C     : boolean := false;
 
   type StateType is ( IDLE_S, SHIFT_S, ARMED_S, ERR_S );
   
@@ -142,6 +143,7 @@ begin
                 valid             => valid_msg,
                 overflow          => full_msg );
 
+  GEN_ILA_G : if ( GEN_ILA_C ) generate
   U_Ila : component work.Ila_256Pkg.Ila_256
     port map (
       clk          => clk,
@@ -160,6 +162,7 @@ begin
       probe3(15 downto  8) => dbgStat,
       probe3(63 downto 16) => (others => '0')
     );
+  end generate;
 
    process (r, rst, delay, valid_cnt, dout_cnt, valid_msg, dout_msg, dout_rdy, firstW, fiducial_i, advance_i ) is
      variable v : RegType;
