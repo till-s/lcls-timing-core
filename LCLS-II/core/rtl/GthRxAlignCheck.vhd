@@ -19,9 +19,11 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.std_logic_arith.all;
+use ieee.numeric_std.all;
 
 use work.StdRtlPkg.all;
 use work.AxiLitePkg.all;
+use work.IlaWrappersPkg.all;
 
 entity GthRxAlignCheck is
    generic (
@@ -315,5 +317,23 @@ begin
          axilWriteSlave  => mAxilWriteSlave,
          axilReadMaster  => mAxilReadMaster,
          axilReadSlave   => mAxilReadSlave);
+
+   GEN_ILA : if ( true ) generate
+      signal state_vec : slv(3 downto 0);
+   begin
+      state_vec <= slv( to_unsigned( StateType'pos( r.state ), state_vec'length ) );
+
+      U_ILA : component Ila_256
+         port map (
+            clk          => axilClk,
+
+            probe0(3 downto 0) => state_vec,
+            probe0(4)          => resetDone,
+            probe0(5)          => resetErr,
+            probe0(6)          => resetIn,
+
+            probe0(63 downto 7) => (others => '0')
+         );
+   end generate;
 
 end rtl;
