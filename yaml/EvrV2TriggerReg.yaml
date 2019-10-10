@@ -26,6 +26,9 @@ EvrV2TriggerReg: &EvrV2TriggerReg
       lsBit: 7
       mode: RW
       description: Trigger enable
+      enums:
+        - { name: "Disabled", value: 0 }
+        - { name: "Enabled",  value: 1 }
     #########################################################  
     Source:
       at:
@@ -36,6 +39,14 @@ EvrV2TriggerReg: &EvrV2TriggerReg
       lsBit: 0
       mode: RW
       description: Source channel
+      enums:
+        - { name: "Channel 0", value: 0 }
+        - { name: "Channel 1", value: 1 }
+        - { name: "Channel 2", value: 2 }
+        - { name: "Channel 3", value: 3 }
+        - { name: "Channel 4", value: 4 }
+        - { name: "Channel 5", value: 5 }
+        - { name: "Channel 6", value: 6 }
     #########################################################  
     Polarity:
       at:
@@ -84,7 +95,7 @@ EvrV2TriggerReg: &EvrV2TriggerReg
       sizeBits: 6
       lsBit: 0
       mode: RW
-      description: Delay tap in ticks/64 (Only valid register is USE_TAP_C=true)
+      description: Delay tap in ticks/64
     #########################################################  
     DelayTapReadback:
       at:
@@ -94,5 +105,5 @@ EvrV2TriggerReg: &EvrV2TriggerReg
       sizeBits: 6
       lsBit: 0
       mode: RO
-      description: Delay tap readback in ticks/64 (Only valid register is USE_TAP_C=true)
+      description: Delay tap readback in ticks/64
     #########################################################  

@@ -1,10 +1,10 @@
 #############################
 ## This file is part of 'SLAC Firmware Standard Library'.
-## It is subject to the license terms in the LICENSE.txt file found in the 
-## top-level directory of this distribution and at: 
-##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
-## No part of 'SLAC Firmware Standard Library', including this file, 
-## may be copied, modified, propagated, or distributed except according to 
+## It is subject to the license terms in the LICENSE.txt file found in the
+## top-level directory of this distribution and at:
+##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+## No part of 'SLAC Firmware Standard Library', including this file,
+## may be copied, modified, propagated, or distributed except according to
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 #schemaversion 3.0.0
@@ -16,37 +16,37 @@ EvrV2ChannelReg: &EvrV2ChannelReg
   description: Channel
   size: 0x20
   children:
-    #########################################################  
+    #########################################################
     Enable:
       at:
         offset: 0x00
       class: IntField
-      name: Enable
       sizeBits: 1
       lsBit: 0
       mode: RW
       description: Enable Register
-    #########################################################  
+      enums:
+        - { name: "Disabled", value: 0 }
+        - { name: "Enabled",  value: 1 }
+    #########################################################
     BsaEnabled:
       at:
         offset: 0x00
       class: IntField
-      name: BsaEnabled
       sizeBits: 1
       lsBit: 1
       mode: RW
-      description: Bsa Enable Register (Only valid register is DMA_ENABLE_G=true)
-    #########################################################  
+      description: Bsa Enable Register
+    #########################################################
     DmaEnabled:
       at:
         offset: 0x00
       class: IntField
-      name: DmaEnabled
       sizeBits: 1
       lsBit: 2
       mode: RW
-      description: Dma Enable Register (Only valid register is DMA_ENABLE_G=true)
-    #########################################################  
+      description: Dma Enable Register
+    #########################################################
     RateSel:
       at:
         offset: 0x04
@@ -56,7 +56,7 @@ EvrV2ChannelReg: &EvrV2ChannelReg
       lsBit: 0
       mode: RW
       description: Rate select
-    #########################################################  
+    #########################################################
     DestSel:
       at:
         offset: 0x05
@@ -66,42 +66,128 @@ EvrV2ChannelReg: &EvrV2ChannelReg
       lsBit: 5
       mode: RW
       description: Destination select
-    #########################################################  
+    #########################################################
+    RateSelMode:
+      at:
+        offset: 0x05
+      class: IntField
+      sizeBits: 2
+      lsBit: 3
+      mode: RW
+      description: Rate Type/Mode
+      enums:
+        - { name: "FixedRate", value: 0 }
+        - { name: "ACRate"   , value: 1 }
+        - { name: "Sequencer", value: 2 }
+    #########################################################
+    FixedRate:
+      at:
+        offset: 0x04
+      class: IntField
+      sizeBits: 3
+      lsBit: 0
+      mode: RW
+      description: "Rate selection when in 'FixedRate' mode"
+      enums:
+        - { name:     "1 MHz", value: 0 }
+        - { name:    "71 kHz", value: 1 }
+        - { name:    "10 kHz", value: 2 }
+        - { name:     "1 kHz", value: 3 }
+        - { name:   "100 Hz" , value: 4 }
+        - { name:    "10 Hz" , value: 5 }
+        - { name:     "1 Hz" , value: 6 }
+        - { name: "reserved" , value: 7 }
+    #########################################################
+    ACRate:
+      at:
+        offset: 0x04
+      class: IntField
+      sizeBits: 3
+      lsBit: 0
+      mode: RW
+      description: "Rate selection when in 'ACRate' mode"
+      enums:
+        - { name:     "60 Hz", value: 0 }
+        - { name:     "30 Hz", value: 1 }
+        - { name:     "10 Hz", value: 2 }
+        - { name:      "5 Hz", value: 3 }
+        - { name:      "1 Hz", value: 4 }
+        - { name:    "1/2 Hz", value: 5 }
+        - { name: "reserved1", value: 6 }
+        - { name: "reserved2", value: 7 }
+    #########################################################
+    ACTimeSlotMask:
+      at:
+        offset: 0x04
+      class: IntField
+      sizeBits: 6
+      lsBit: 3
+      mode: RW
+      description: "Time-slot mask when in 'ACRate' mode"
+    #########################################################
+    SequenceSelect:
+      at:
+        offset: 0x04
+      class: IntField
+      name: RateSelect
+      sizeBits:  9
+      lsBit: 0
+      mode: RW
+      description: "Sequence selector (=EventNo in LCLS-1 mode) when in 'Sequencer' mode"
+    #########################################################
+    DestSelMode:
+      at:
+        offset: 0x07
+      class: IntField
+      sizeBits: 2
+      lsBit: 5
+      mode: RW
+      description: Destination type/mode
+      enums:
+        - { name: "Inclusive", value: 0 }
+        - { name: "Exclusive", value: 1 }
+        - { name: "Dont_Care", value: 2 }
+    #########################################################
+    DestSelMask:
+      at:
+        offset: 0x05
+      class: IntField
+      sizeBits: 16
+      lsBit: 5
+      mode: RW
+      description: "Destination inclusion/exclusion mask"
+    #########################################################
     Count:
       at:
         offset: 0x08
       class: IntField
-      name: Count
       mode: RO
       description: Counts
-    #########################################################  
+    #########################################################
     BsaWindowDelay:
       at:
         offset: 0x0C
       class: IntField
-      name: BsaWindowDelay
       sizeBits: 20
       lsBit: 0
       mode: RW
-      description: Start of BSA sensitivity window following trigger (Only valid register is DMA_ENABLE_G=true)
-    #########################################################  
+      description: Start of BSA sensitivity window following trigger
+    #########################################################
     BsaWindowSetup:
       at:
         offset: 0x0E
       class: IntField
-      name: BsaWindowSetup
       sizeBits: 6
       lsBit: 4
       mode: RW
-      description: Start of BSA sensitivity window before trigger (Only valid register is DMA_ENABLE_G=true)
-    #########################################################  
+      description: Start of BSA sensitivity window before trigger
+    #########################################################
     BsaWindowWidth:
       at:
         offset: 0x10
       class: IntField
-      name: BsaWindowWidth
       sizeBits: 20
       lsBit: 0
       mode: RW
-      description: Width of BSA sensitivity window (Only valid register is DMA_ENABLE_G=true)
-    #########################################################  
+      description: Width of BSA sensitivity window
+    #########################################################

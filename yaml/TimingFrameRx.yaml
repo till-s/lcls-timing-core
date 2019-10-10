@@ -141,6 +141,9 @@ TimingFrameRx: &TimingFrameRx
       lsBit: 4
       mode: RW
       description: Select LCLS-I/LCLS-II Timing
+      enums:
+        - { name: "LCLS-1", value: 0 }
+        - { name: "LCLS-2", value: 1 }
     #########################################################
     RxDown:
       at:
@@ -266,4 +269,3 @@ TimingFrameRx: &TimingFrameRx
       - entry: RxCountReset
         value: 0 
     #########################################################
-    
